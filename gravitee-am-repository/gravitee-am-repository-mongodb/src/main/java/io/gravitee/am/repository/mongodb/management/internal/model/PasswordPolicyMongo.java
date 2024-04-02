@@ -40,6 +40,6 @@ public class PasswordPolicyMongo extends Auditable {
     private Boolean excludePasswordsInDictionary;
     private Boolean excludeUserProfileInfoInPassword;
     private Integer expiryDuration;
-    private boolean passwordHistoryEnabled;
+    private Boolean passwordHistoryEnabled;
     private Short oldPasswords;
 }
