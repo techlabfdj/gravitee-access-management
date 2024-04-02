@@ -440,6 +440,7 @@ import { ExpressionInfoDialogComponent } from './domain/applications/application
 import { FactorsSelectDialogComponent } from './domain/applications/application/advanced/factors/mfa/factors-select-dialog/factors-select-dialog.component';
 import { SelectionRuleDialogComponent } from './domain/applications/application/advanced/factors/selection-rule-dialog/selection-rule-dialog.component';
 import { PasswordPoliciesComponent } from './domain/settings/password-policies/domain-password-policies.component';
+import { PasswordPolicyService } from './services/passwordPolicy.service';
 
 @NgModule({
   declarations: [
@@ -874,6 +875,7 @@ import { PasswordPoliciesComponent } from './domain/settings/password-policies/d
     I18nDictionaryService,
     ThemesResolver,
     ThemeService,
+    PasswordPolicyService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpRequestInterceptor,
