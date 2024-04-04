@@ -17,6 +17,7 @@ package io.gravitee.am.gateway.handler.root.resources.endpoint.user.register;
 
 import io.gravitee.am.common.oauth2.Parameters;
 import io.gravitee.am.common.utils.ConstantKeys;
+import io.gravitee.am.gateway.handler.common.password.PasswordPolicyManager;
 import io.gravitee.am.gateway.handler.manager.botdetection.BotDetectionManager;
 import io.gravitee.am.gateway.handler.root.resources.endpoint.AbstractEndpoint;
 import io.gravitee.am.model.Domain;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.gravitee.am.common.utils.ConstantKeys.PASSWORD_SETTINGS_PARAM_KEY;
 import static io.gravitee.am.gateway.handler.common.utils.ThymeleafDataHelper.generateData;
 import static io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest.CONTEXT_PATH;
 import static io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest.resolveProxyRequest;
@@ -54,11 +54,13 @@ public class RegisterEndpoint extends AbstractEndpoint implements Handler<Routin
 
     private final Domain domain;
     private final BotDetectionManager botDetectionManager;
+    private final PasswordPolicyManager passwordPolicyManager;
 
-    public RegisterEndpoint(TemplateEngine engine, Domain domain, BotDetectionManager botDetectionManager) {
+    public RegisterEndpoint(TemplateEngine engine, Domain domain, BotDetectionManager botDetectionManager, PasswordPolicyManager passwordPolicyManager) {
         super(engine);
         this.domain = domain;
         this.botDetectionManager = botDetectionManager;
+        this.passwordPolicyManager = passwordPolicyManager;
     }
 
     @Override
@@ -67,8 +69,7 @@ public class RegisterEndpoint extends AbstractEndpoint implements Handler<Routin
         copyValue(request, routingContext, ConstantKeys.SUCCESS_PARAM_KEY);
         copyValue(request, routingContext, ConstantKeys.WARNING_PARAM_KEY);
         Client client = routingContext.get(ConstantKeys.CLIENT_CONTEXT_KEY);
-
-        PasswordSettings.getInstance(client, domain).ifPresent(v -> routingContext.put(PASSWORD_SETTINGS_PARAM_KEY, v));
+        passwordPolicyManager.getPolicy(client).ifPresent(v -> routingContext.put(ConstantKeys.PASSWORD_SETTINGS_PARAM_KEY, v));
 
         AccountSettings.getInstance(client, domain).ifPresent(accountSettings ->
                 routingContext.put(ConstantKeys.TEMPLATE_VERIFY_REGISTRATION_ACCOUNT_KEY, accountSettings.isSendVerifyRegistrationAccountEmail())

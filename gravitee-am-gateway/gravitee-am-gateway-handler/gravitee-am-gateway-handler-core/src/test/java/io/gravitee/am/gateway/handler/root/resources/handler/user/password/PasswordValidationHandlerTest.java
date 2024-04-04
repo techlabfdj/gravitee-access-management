@@ -16,6 +16,7 @@
 package io.gravitee.am.gateway.handler.root.resources.handler.user.password;
 
 import io.gravitee.am.common.utils.ConstantKeys;
+import io.gravitee.am.gateway.handler.common.password.PasswordPolicyManager;
 import io.gravitee.am.gateway.handler.root.service.user.UserService;
 import io.gravitee.am.gateway.handler.root.service.user.model.UserToken;
 import io.gravitee.am.model.Domain;
@@ -49,6 +50,8 @@ import static org.mockito.Mockito.verify;
 class PasswordValidationHandlerTest {
 
     @Mock
+    private PasswordPolicyManager passwordPolicyManager;
+    @Mock
     private PasswordService passwordService;
     @Mock
     private UserService userService;
@@ -58,7 +61,7 @@ class PasswordValidationHandlerTest {
     void shouldReturnAppropriateStatusCode(PasswordSettingsStatus pwdSettingsStatus, int statusCode) {
         var domain = new Domain();
         domain.setId(UUID.randomUUID().toString());
-        var handler = new PasswordValidationHandler(passwordService, userService, domain);
+        var handler = new PasswordValidationHandler(passwordService, userService, domain, passwordPolicyManager);
 
         var user = new User();
         user.setId(UUID.randomUUID().toString());

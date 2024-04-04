@@ -17,9 +17,9 @@ package io.gravitee.am.gateway.handler.root.resources.handler.user.password;
 
 import io.gravitee.am.common.exception.oauth2.InvalidRequestException;
 import io.gravitee.am.common.utils.ConstantKeys;
+import io.gravitee.am.gateway.handler.common.password.PasswordPolicyManager;
 import io.gravitee.am.gateway.handler.root.service.user.UserService;
 import io.gravitee.am.model.Domain;
-import io.gravitee.am.model.PasswordSettings;
 import io.gravitee.am.model.oidc.Client;
 import io.gravitee.am.service.PasswordService;
 import io.gravitee.common.http.HttpStatusCode;
@@ -33,11 +33,13 @@ import io.vertx.rxjava3.ext.web.RoutingContext;
  */
 public class PasswordValidationHandler implements Handler<RoutingContext> {
 
+    private final PasswordPolicyManager passwordPolicyManager;
     private final PasswordService passwordService;
     private final UserService userService;
     private final Domain domain;
 
-    public PasswordValidationHandler(PasswordService passwordService, UserService userService, Domain domain) {
+    public PasswordValidationHandler(PasswordService passwordService, UserService userService, Domain domain, PasswordPolicyManager passwordPolicyManager) {
+        this.passwordPolicyManager = passwordPolicyManager;
         this.passwordService = passwordService;
         this.userService = userService;
         this.domain = domain;
@@ -54,7 +56,7 @@ public class PasswordValidationHandler implements Handler<RoutingContext> {
                 .switchIfEmpty(Single.error(() -> new InvalidRequestException("No user found for given access_token")))
                 .map(userToken -> {
                     var user = userToken.getUser();
-                    return this.passwordService.evaluate(password, PasswordSettings.getInstance(client, domain).orElse(null), user);
+                    return this.passwordService.evaluate(password, passwordPolicyManager.getPolicy(client).orElse(null), user);
 
                 })
                 .doOnError(throwable -> context.fail(HttpStatusCode.INTERNAL_SERVER_ERROR_500, throwable))
@@ -62,10 +64,5 @@ public class PasswordValidationHandler implements Handler<RoutingContext> {
                         .setStatusCode(pwdStatus.isValid() ? HttpStatusCode.OK_200 : HttpStatusCode.BAD_REQUEST_400)
                         .end(Json.encode(pwdStatus)));
 
-    }
-
-    private PasswordSettings getPasswordSettings(RoutingContext context) {
-        Client client = context.get(ConstantKeys.CLIENT_CONTEXT_KEY);
-        return PasswordSettings.getInstance(client, domain).orElse(null);
     }
 }
