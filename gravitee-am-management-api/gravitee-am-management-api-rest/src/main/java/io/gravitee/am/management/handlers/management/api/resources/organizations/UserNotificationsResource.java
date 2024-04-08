@@ -87,8 +87,12 @@ public class UserNotificationsResource extends AbstractResource {
 
     @POST
     @Path("/{notificationId}/acknowledge")
+<<<<<<< HEAD
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Mark User notification as read")
+=======
+    @Operation(summary = "Mark User notification as read")
+>>>>>>> ce5f35b073 (fix: build JAX-RS response before calling resume for user notification acknowledgment to avoid error)
     @ApiResponses({
             @ApiResponse(code = 204, message = "User notification has been marked as read"),
             @ApiResponse(code = 500, message = "Internal server error")})
@@ -101,6 +105,6 @@ public class UserNotificationsResource extends AbstractResource {
 
         final User authenticatedUser = getAuthenticatedUser();
         notificationService.markAsRead(authenticatedUser, notificationId)
-                .subscribe(() -> response.resume(Response.noContent()), response::resume);
+                .subscribe(() -> response.resume(Response.noContent().build()), response::resume);
     }
 }
