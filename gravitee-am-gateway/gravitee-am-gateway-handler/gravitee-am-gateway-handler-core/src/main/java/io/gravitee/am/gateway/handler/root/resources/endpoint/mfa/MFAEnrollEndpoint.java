@@ -23,7 +23,9 @@ import io.gravitee.am.factor.api.Enrollment;
 import io.gravitee.am.factor.api.FactorContext;
 import io.gravitee.am.factor.api.FactorProvider;
 import io.gravitee.am.gateway.handler.common.factor.FactorManager;
+import static io.gravitee.am.gateway.handler.common.utils.ThymeleafDataHelper.generateData;
 import io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest;
+import io.gravitee.am.gateway.handler.common.vertx.web.handler.impl.internal.mfa.MfaFilterContext;
 import io.gravitee.am.gateway.handler.root.resources.endpoint.AbstractEndpoint;
 import io.gravitee.am.gateway.handler.root.service.user.UserService;
 import io.gravitee.am.model.Domain;
@@ -49,20 +51,17 @@ import io.vertx.rxjava3.core.http.HttpServerResponse;
 import io.vertx.rxjava3.ext.web.RoutingContext;
 import io.vertx.rxjava3.ext.web.Session;
 import io.vertx.rxjava3.ext.web.common.template.TemplateEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import static java.util.Optional.ofNullable;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static io.gravitee.am.gateway.handler.common.utils.ThymeleafDataHelper.generateData;
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -93,9 +92,20 @@ public class MFAEnrollEndpoint extends AbstractEndpoint implements Handler<Routi
     public void handle(RoutingContext routingContext) {
         HttpServerRequest req = routingContext.request();
         switch (req.method().name()) {
-            case "GET":
-                renderPage(routingContext);
-                break;
+            case "GET": {
+                if (routingContext.user() == null) {
+                    logger.warn("User must be authenticated to enroll MFA challenge.");
+                    routingContext.fail(401);
+                    return;
+                }
+                var context = new MfaFilterContext(routingContext, routingContext.get(ConstantKeys.CLIENT_CONTEXT_KEY), factorManager);
+                if (context.userHasMatchingFactors()) {
+                    redirectToAuthorize(routingContext);
+                } else {
+                    renderPage(routingContext);
+                }
+            }
+            break;
             case "POST":
                 saveEnrollment(routingContext);
                 break;
@@ -106,12 +116,6 @@ public class MFAEnrollEndpoint extends AbstractEndpoint implements Handler<Routi
 
     private void renderPage(RoutingContext routingContext) {
         try {
-            if (routingContext.user() == null) {
-                logger.warn("User must be authenticated to enroll MFA challenge.");
-                routingContext.fail(401);
-                return;
-            }
-
             final io.gravitee.am.model.User endUser = ((io.gravitee.am.gateway.handler.common.vertx.web.auth.user.User) routingContext.user().getDelegate()).getUser();
             final Client client = routingContext.get(ConstantKeys.CLIENT_CONTEXT_KEY);
             final Map<io.gravitee.am.model.Factor, FactorProvider> factors = getFactors(client);
