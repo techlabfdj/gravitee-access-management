@@ -25,6 +25,7 @@ import io.gravitee.am.model.permissions.Permission;
 import io.gravitee.am.service.DomainService;
 import io.gravitee.am.service.exception.DomainNotFoundException;
 import io.gravitee.am.service.exception.IdentityProviderNotFoundException;
+import io.gravitee.am.service.model.AssignPasswordPolicyToIdp;
 import io.gravitee.am.service.model.UpdateIdentityProvider;
 import io.gravitee.common.http.MediaType;
 import io.reactivex.rxjava3.core.Maybe;
@@ -133,6 +134,33 @@ public class IdentityProviderResource extends AbstractResource {
                         .switchIfEmpty(Maybe.error(new DomainNotFoundException(domain)))
                         .flatMapSingle(__ -> identityProviderService.update(domain, identity, updateIdentityProvider, authenticatedUser, false)))
                         .map(idp -> hideConfiguration(idp))
+                .subscribe(response::resume, response::resume);
+    }
+
+
+    @PUT
+    @Path("/password-policy")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Assign password policy to identity provider",
+            description = "User must have the ORGANIZATION_IDENTITY_PROVIDER[UPDATE] permission on the specified organization")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Password Policy successfully assigned to  Identity provider",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AssignPasswordPolicyToIdp.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public void updatePasswordPolicy(
+            @PathParam("organizationId") String organizationId,
+            @PathParam("environmentId") String environmentId,
+            @PathParam("domain") String domain,
+            @PathParam("identity") String identity,
+            @Parameter(name = "passwordPolicy", required = true) @Valid @NotNull AssignPasswordPolicyToIdp assignPasswordPolicyToIdp,
+            @Suspended final AsyncResponse response) {
+        checkAnyPermission(organizationId, environmentId, domain, Permission.DOMAIN_IDENTITY_PROVIDER, Acl.UPDATE)
+                .andThen(domainService.findById(domain)
+                        .switchIfEmpty(Maybe.error(new DomainNotFoundException(domain)))
+                        .flatMapSingle(__ ->identityProviderService.updatePasswordPolicy(domain, identity, assignPasswordPolicyToIdp)))
+                .map(idp -> hideConfiguration(idp))
                 .subscribe(response::resume, response::resume);
     }
 

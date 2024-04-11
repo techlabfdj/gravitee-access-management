@@ -72,13 +72,18 @@ export class PasswordPoliciesIdpSelectDialogComponent {
     this.dialogRef.close(this.result);
   }
 
-  handleEvent(event: { id: string; selected: boolean }, array: string[]) {
+  handleEvent(event: { id: string; selected: boolean }, result: DialogResult): void {
     if (event.selected) {
-      array.push(event.id);
+      result.idpsToLink.push(event.id);
+      const i = result.idpsToUnlink.indexOf(event.id);
+      if (i !== -1) {
+        result.idpsToUnlink.splice(i, 1);
+      }
     } else {
-      const index = array.indexOf(event.id);
-      if (index !== -1) {
-        array.splice(index, 1);
+      result.idpsToUnlink.push(event.id);
+      const i = result.idpsToLink.indexOf(event.id);
+      if (i !== -1) {
+        result.idpsToLink.splice(i, 1);
       }
     }
   }
