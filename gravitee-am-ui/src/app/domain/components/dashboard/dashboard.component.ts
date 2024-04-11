@@ -71,7 +71,6 @@ export class DashboardComponent implements OnInit {
 
   private query(widget): Observable<Widget> {
     const selectedTimeRange = find(this.timeRanges, { id: this.selectedTimeRange });
-
     const analyticsQuery = {
       type: widget.chart.request.type,
       field: widget.chart.request.field,

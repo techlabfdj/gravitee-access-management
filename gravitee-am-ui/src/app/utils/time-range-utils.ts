@@ -31,8 +31,8 @@ export const availableTimeRanges: TimeRange[] = [
   {
     id: '1h',
     name: 'Last hour',
-    value: 1,
-    unit: 'hours',
+    value: 60,
+    unit: 'minutes',
     interval: 1000 * 60,
   },
   {
@@ -45,29 +45,29 @@ export const availableTimeRanges: TimeRange[] = [
   {
     id: '1d',
     name: 'Today',
-    value: 1,
-    unit: 'days',
+    value: 24,
+    unit: 'hours',
     interval: 1000 * 60 * 60,
   },
   {
     id: '7d',
     name: 'This week',
-    value: 1,
-    unit: 'weeks',
+    value: 7,
+    unit: 'days',
     interval: 1000 * 60 * 60 * 24,
   },
   {
     id: '30d',
     name: 'This month',
-    value: 1,
-    unit: 'months',
-    interval: 1000 * 60 * 60 * 24,
+    value: 4,
+    unit: 'weeks',
+    interval: 1000 * 60 * 60 * 24 * 7,
   },
   {
     id: '90d',
     name: 'Last 90 days',
     value: 3,
     unit: 'months',
-    interval: 1000 * 60 * 60 * 24,
+    interval: 1000 * 60 * 60 * 24 * 30,
   },
 ];
