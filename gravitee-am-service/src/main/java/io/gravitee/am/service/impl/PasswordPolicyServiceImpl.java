@@ -30,13 +30,16 @@ import io.gravitee.am.model.common.event.Payload;
 import io.gravitee.am.repository.management.api.PasswordPolicyRepository;
 import io.gravitee.am.service.AuditService;
 import io.gravitee.am.service.EventService;
+import io.gravitee.am.service.IdentityProviderService;
 import io.gravitee.am.service.PasswordPolicyService;
 import io.gravitee.am.service.exception.PasswordPolicyNotFoundException;
 import io.gravitee.am.service.exception.TechnicalManagementException;
+import io.gravitee.am.service.model.AssignPasswordPolicy;
 import io.gravitee.am.service.model.NewPasswordPolicy;
 import io.gravitee.am.service.model.UpdatePasswordPolicy;
 import io.gravitee.am.service.reporter.builder.AuditBuilder;
 import io.gravitee.am.service.reporter.builder.management.PasswordPolicyAuditBuilder;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -68,6 +71,9 @@ public class PasswordPolicyServiceImpl implements PasswordPolicyService {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private IdentityProviderService identityProviderService;
 
     @Override
     public Flowable<PasswordPolicy> findByDomain(String domain) {
@@ -103,7 +109,7 @@ public class PasswordPolicyServiceImpl implements PasswordPolicyService {
 
     @Override
     public Maybe<PasswordPolicy> findByReferenceAndId(ReferenceType referenceType, String referenceId, String policyId) {
-        log.debug("Update password policy id '{}' for {} {}", policyId, referenceType, referenceId);
+        log.debug("Find password policy with id '{}' for {} {}", policyId, referenceType, referenceId);
         return passwordPolicyRepository.findByReferenceAndId(referenceType, referenceId, policyId);
     }
 
@@ -134,6 +140,33 @@ public class PasswordPolicyServiceImpl implements PasswordPolicyService {
                 .doOnError(error -> auditService.report(AuditBuilder.builder(PasswordPolicyAuditBuilder.class)
                         .principal(principal)
                         .type(EventType.PASSWORD_POLICY_UPDATED).throwable(error)));
+    }
+
+    @Override
+    public Completable delete(ReferenceType referenceType, String referenceId, String policyId, User principal) {
+        log.debug("Delete password policy with id '{}' for {} {}", policyId, referenceType, referenceId);
+        return passwordPolicyRepository.findByReferenceAndId(referenceType, referenceId, policyId)
+                .flatMap(policy ->
+                        identityProviderService.findWithPasswordPolicy(referenceType, referenceId, policyId)
+                        .flatMapSingle(provider -> identityProviderService.updatePasswordPolicy(referenceId, provider.getId(), new AssignPasswordPolicy()))
+                                .ignoreElements().andThen(Maybe.just(policy))
+                )
+                .flatMap(policy -> passwordPolicyRepository.delete(policy.getId()).andThen(Maybe.just(policy)))
+                .flatMap(policy -> {
+                    Event event = new Event(Type.PASSWORD_POLICY, new Payload(policy.getId(), referenceType, referenceId, Action.DELETE));
+                    return eventService.create(event).flatMapMaybe(__ -> Maybe.just(policy));
+                })
+                .doOnSuccess(policy -> auditService.report(AuditBuilder.builder(PasswordPolicyAuditBuilder.class)
+                        .principal(principal)
+                        .type(EventType.PASSWORD_POLICY_DELETED)
+                        .policy(null)
+                        .oldValue(policy)))
+                .doOnError(error -> auditService.report(AuditBuilder.builder(PasswordPolicyAuditBuilder.class)
+                        .principal(principal)
+                        .type(EventType.PASSWORD_POLICY_DELETED)
+                        .throwable(error)))
+                // TODO Add here a reset default policy if we are deleting the default one (AM-3008)
+                .ignoreElement();
     }
 
     @Override
