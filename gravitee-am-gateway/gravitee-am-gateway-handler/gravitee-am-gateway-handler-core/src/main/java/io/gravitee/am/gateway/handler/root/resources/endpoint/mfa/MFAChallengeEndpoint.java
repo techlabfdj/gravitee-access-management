@@ -358,6 +358,7 @@ public class MFAChallengeEndpoint extends MFAEndpoint {
                 updateStrongAuthStatus(routingContext);
                 redirectToAuthorize(routingContext, client, endUser);
             }
+            logger.debug("User {} strongly authenticated", endUser.getId());
         };
     }
 
@@ -378,7 +379,11 @@ public class MFAChallengeEndpoint extends MFAEndpoint {
 
 
             updateStrongAuthStatus(routingContext);
+<<<<<<< HEAD
             updateAuditLog(routingContext, auditLogType, endUser, client, factor, factorContext, null);
+=======
+            logger.info("User {} strongly authenticated", endUser.getId());
+>>>>>>> aa40a49e21 (fix: Added crucial MFA event logs)
             // set the credentialId in session
             routingContext.session().put(ConstantKeys.WEBAUTHN_CREDENTIAL_ID_CONTEXT_KEY, credentialId);
             final Credential credential = ch.result();
@@ -433,6 +438,7 @@ public class MFAChallengeEndpoint extends MFAEndpoint {
                             }
                         },
                         error -> {
+                            logger.info("Challenge failed for user {}", factorContext.getUser().getId());
                             final EnrolledFactor enrolledFactor = (EnrolledFactor) factorContext.getData().get(FactorContext.KEY_ENROLLED_FACTOR);
                             verifyAttemptService.incrementAttempt(factorContext.getUser().getId(), enrolledFactor.getFactorId(),
                                     factorContext.getClient(), domain, verifyAttempt).subscribe(
@@ -490,6 +496,7 @@ public class MFAChallengeEndpoint extends MFAEndpoint {
 
     private void sendChallenge(RoutingContext routingContext, FactorProvider factorProvider, FactorContext factorContext, User endUser, Client client, Factor factor, Handler<AsyncResult<Void>> handler) {
         factorProvider.sendChallenge(factorContext)
+                .doOnComplete(() -> logger.debug("Challenge sent to user {}", factorContext.getUser().getId()))
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                         () -> {
