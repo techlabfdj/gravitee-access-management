@@ -32,14 +32,15 @@ import { UserClaimComponent } from './user-claim.component';
   styleUrls: ['./user-creation.component.scss'],
 })
 export class UserCreationComponent implements OnInit {
-  private domainId: string;
   preRegistration = false;
   hidePassword = true;
+  emailRequired = true;
   useEmailAsUsername = false;
   user: any = {};
   userClaims: any = {};
   userProviders: any[];
   @ViewChild('dynamic', { read: ViewContainerRef, static: true }) viewContainerRef: ViewContainerRef;
+  private domainId: string;
 
   constructor(
     private userService: UserService,
@@ -53,9 +54,13 @@ export class UserCreationComponent implements OnInit {
 
   ngOnInit() {
     this.domainId = this.route.snapshot.data['domain']?.id;
+
     if (!this.isOrganizationUserAction()) {
       this.providerService.findUserProvidersByDomain(this.domainId).subscribe((response) => {
         this.userProviders = response;
+      });
+      this.userService.isEmailRequired().subscribe((response: boolean) => {
+        this.emailRequired = response;
       });
     }
   }
