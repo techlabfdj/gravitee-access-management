@@ -17,20 +17,22 @@ package io.gravitee.am.service.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.gravitee.am.model.IUser;
+import io.gravitee.am.service.validators.UserEmail;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import static io.gravitee.am.service.validators.email.EmailValidatorImpl.EMAIL_MAX_LENGTH;
 
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
  * @author GraviteeSource Teams
  */
+@Getter
+@Setter
 public class NewUser implements IUser {
 
     @NotBlank
@@ -38,8 +40,7 @@ public class NewUser implements IUser {
 
     private String password;
 
-    @NotBlank
-    @Size(max = EMAIL_MAX_LENGTH, message = "must not be greater than " + EMAIL_MAX_LENGTH)
+    @UserEmail
     private String email;
 
     private String firstName;
@@ -83,41 +84,6 @@ public class NewUser implements IUser {
     @Schema(type = "java.lang.Long")
     private Date updatedAt;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
 
     @Override
     @JsonIgnore
@@ -131,145 +97,6 @@ public class NewUser implements IUser {
         return null;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public Boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    public void setAccountNonExpired(boolean accountNonExpired) {
-        this.accountNonExpired = accountNonExpired;
-    }
-
-    public Boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
-    public Boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-        this.credentialsNonExpired = credentialsNonExpired;
-    }
-
-    public Boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Boolean isInternal() {
-        return internal;
-    }
-
-    public void setInternal(boolean internal) {
-        this.internal = internal;
-    }
-
-    public Boolean isPreRegistration() {
-        return preRegistration;
-    }
-
-    public void setPreRegistration(boolean preRegistration) {
-        this.preRegistration = preRegistration;
-    }
-
-    public Boolean isRegistrationCompleted() {
-        return registrationCompleted;
-    }
-
-    public void setRegistrationCompleted(boolean registrationCompleted) {
-        this.registrationCompleted = registrationCompleted;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getClient() {
-        return client;
-    }
-
-    public void setClient(String client) {
-        this.client = client;
-    }
-
-    public Long getLoginsCount() {
-        return loginsCount;
-    }
-
-    public void setLoginsCount(Long loginsCount) {
-        this.loginsCount = loginsCount;
-    }
-
-    public Date getLoggedAt() {
-        return loggedAt;
-    }
-
-    public void setLoggedAt(Date loggedAt) {
-        this.loggedAt = loggedAt;
-    }
-
-    public String getPreferredLanguage() {
-        return preferredLanguage;
-    }
-
-    public void setPreferredLanguage(String preferredLanguage) {
-        this.preferredLanguage = preferredLanguage;
-    }
-
-    public Map<String, Object> getAdditionalInformation() {
-        return additionalInformation;
-    }
-
-    public void setAdditionalInformation(Map<String, Object> additionalInformation) {
-        this.additionalInformation = additionalInformation;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     @Override
     public String toString() {
