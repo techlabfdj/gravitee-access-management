@@ -17,6 +17,7 @@ package io.gravitee.am.certificate.api;
 
 import io.gravitee.am.model.jose.JWK;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 
 import java.security.cert.Certificate;
@@ -44,6 +45,10 @@ public interface CertificateProvider {
     CertificateMetadata certificateMetadata();
 
     String signatureAlgorithm();
+
+    default Maybe<CertificateBundle> getCertificateBundleDetails() {
+        return Maybe.empty();
+    }
 
     default Certificate certificate() {
         return null;

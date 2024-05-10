@@ -24,6 +24,7 @@ import io.gravitee.am.model.jose.ECKey;
 import io.gravitee.am.model.jose.JWK;
 import io.gravitee.am.model.jose.RSAKey;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -106,6 +107,15 @@ public abstract class AbstractCertificateProvider implements CertificateProvider
                 throw new IllegalArgumentException("An ECSDA or RSA Signer must be supplied");
             }
         }
+    }
+
+    @Override
+    public Maybe<CertificateBundle> getCertificateBundleDetails() {
+        return Maybe.just(certificateMetadata)
+                .map(CertificateMetadata::getMetadata)
+                .map(metadata -> metadata.get(CertificateMetadata.FILE))
+                .map(file -> Objects.requireNonNull(file, invalidCertificateFileMessage()))
+                .map(file -> new CertificateBundle((byte[]) file, getStorepass(), getKeypass(), getAlias()));
     }
 
     protected abstract String getStorepass();

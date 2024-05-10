@@ -15,7 +15,11 @@
  */
 package io.gravitee.am.identityprovider.oauth2.authentication.spring;
 
+import io.gravitee.am.certificate.api.CertificateManager;
+import io.gravitee.am.certificate.api.CertificateProvider;
+import io.gravitee.am.common.oidc.ClientAuthenticationMethod;
 import io.gravitee.am.identityprovider.oauth2.OAuth2GenericIdentityProviderConfiguration;
+import io.gravitee.am.service.http.WebClientInitializer;
 import io.gravitee.am.service.http.WebClientBuilder;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.rxjava3.core.Vertx;
@@ -44,6 +48,9 @@ public class OAuth2GenericAuthenticationProviderConfiguration {
     @Autowired
     private OAuth2GenericIdentityProviderConfiguration configuration;
 
+    @Autowired
+    private CertificateManager certificateManager;
+
     @Bean
     public WebClientBuilder webClientBuilder() {
         return new WebClientBuilder();
@@ -52,6 +59,11 @@ public class OAuth2GenericAuthenticationProviderConfiguration {
     @Bean
     @Qualifier("oauthWebClient")
     public WebClient httpClient(WebClientBuilder webClientBuilder) {
+        var delegate = WebClientInitializer.asyncInitialize(() -> createHttpClient(webClientBuilder)).getDelegate();
+        return new WebClient(delegate);
+    }
+
+    private WebClient createHttpClient(WebClientBuilder webClientBuilder) {
         WebClientOptions httpClientOptions = new WebClientOptions();
         httpClientOptions
                 .setUserAgent(DEFAULT_USER_AGENT)
@@ -61,7 +73,12 @@ public class OAuth2GenericAuthenticationProviderConfiguration {
                 .setMaxPoolSize(configuration.getMaxPoolSize())
                 .setSsl(isTLS());
 
-        return webClientBuilder.createWebClient(vertx, httpClientOptions, configuration.getUserAuthorizationUri());
+        if (configuration.getClientAuthenticationMethod().equals(ClientAuthenticationMethod.TLS_CLIENT_AUTH)) {
+            return createMTLSWebClient(webClientBuilder, httpClientOptions);
+        } else {
+            return createWebClient(webClientBuilder, httpClientOptions);
+        }
+
     }
 
     /**
@@ -76,4 +93,17 @@ public class OAuth2GenericAuthenticationProviderConfiguration {
                 && configuration.getUserProfileUri() != null && configuration.getUserProfileUri().startsWith(HTTPS)
                 && configuration.getWellKnownUri() != null && configuration.getWellKnownUri().startsWith(HTTPS);
     }
+
+    private WebClient createMTLSWebClient(WebClientBuilder webClientBuilder, WebClientOptions options) {
+        CertificateProvider certificate = certificateManager.getCertificate(configuration.getClientAuthenticationCertificate());
+        if (certificate == null) {
+            throw new IllegalStateException("Certificate not loaded yet");
+        }
+        return webClientBuilder.createMTLSWebClient(vertx, options, configuration.getUserAuthorizationUri(), certificate);
+    }
+
+    private WebClient createWebClient(WebClientBuilder webClientBuilder, WebClientOptions options) {
+        return webClientBuilder.createWebClient(vertx, options, configuration.getUserAuthorizationUri());
+    }
+
 }

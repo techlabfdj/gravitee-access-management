@@ -15,12 +15,15 @@
  */
 package io.gravitee.am.identityprovider.oauth2.authentication;
 
+import io.gravitee.am.certificate.api.CertificateManager;
+import io.gravitee.am.certificate.api.CertificateProvider;
 import io.gravitee.am.identityprovider.api.AuthenticationProvider;
 import io.gravitee.am.identityprovider.api.DefaultIdentityProviderMapper;
 import io.gravitee.am.identityprovider.api.DefaultIdentityProviderRoleMapper;
 import io.gravitee.am.identityprovider.oauth2.OAuth2GenericIdentityProviderConfiguration;
 import io.gravitee.am.service.http.WebClientBuilder;
 import io.vertx.rxjava3.core.Vertx;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -59,6 +62,11 @@ public class OAuth2GenericAuthenticationProviderTestConfiguration {
     @Bean
     public DefaultIdentityProviderRoleMapper roleMapper() {
         return new DefaultIdentityProviderRoleMapper();
+    }
+
+    @Bean
+    public CertificateManager certificateManager() {
+        return id -> Mockito.mock(CertificateProvider.class);
     }
 
     @Bean("graviteeProperties")
