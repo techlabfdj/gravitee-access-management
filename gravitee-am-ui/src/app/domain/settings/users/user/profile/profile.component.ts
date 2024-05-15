@@ -98,7 +98,11 @@ export class UserProfileComponent implements OnInit {
     // TODO we should be able to update platform users
     this.user.additionalInformation = this.user.additionalInformation || {};
     Object.keys(this.userClaims).forEach((key) => (this.user.additionalInformation[key] = this.userClaims[key]));
-    this.user.displayName = [this.user.firstName, this.user.lastName].filter(Boolean).join(' ');
+    if (this.user.firstName || this.user.lastName) {
+      this.user.displayName = [this.user.firstName, this.user.lastName].filter(Boolean).join(' ');
+    } else {
+      this.user.displayName = this.user.username;
+    }
     this.userService.update(this.domainId, this.user.id, this.user, this.organizationContext).subscribe((data) => {
       this.user = data;
       this.userClaims = {};
@@ -111,7 +115,10 @@ export class UserProfileComponent implements OnInit {
   delete(event: Event): void {
     event.preventDefault();
     this.dialogService
-      .confirm('Delete User', 'Are you sure you want to delete this user ?')
+      .confirm(
+        this.isServiceAccount() ? 'Delete Service User' : 'Delete User',
+        'Are you sure you want to delete this ' + (this.isServiceAccount() ? 'service user' : 'user') + '?',
+      )
       .pipe(
         filter((res) => res),
         switchMap(() => this.userService.delete(this.domainId, this.user.id, this.organizationContext)),
@@ -264,7 +271,10 @@ export class UserProfileComponent implements OnInit {
 
   updateUsername(): void {
     this.dialogService
-      .confirm('Update Username', 'Are you sure you want to update this username?')
+      .confirm(
+        this.isServiceAccount() ? 'Update Service Name' : 'Update Username',
+        'Are you sure you want to update this ' + (this.isServiceAccount() ? 'service name' : 'username') + '?',
+      )
       .pipe(
         filter((res) => res),
         switchMap(() => this.userService.updateUsername(this.domainId, this.user.id, this.organizationContext, this.user.username)),
@@ -362,13 +372,7 @@ export class UserProfileComponent implements OnInit {
     this.formChanged = true;
   }
 
-  passwordReset(): boolean {
-    //Sometimes time differ by 1 millisecond
-    if (!this.user.lastPasswordReset) {
-      return false;
-    }
-    const lastPasswordResetSeconds = Math.floor(this.user.lastPasswordReset / 1000);
-    const createdAtSeconds = Math.floor(this.user.createdAt / 1000);
-    return lastPasswordResetSeconds !== createdAtSeconds;
+  isServiceAccount(): boolean {
+    return this.user?.serviceAccount ?? false;
   }
 }

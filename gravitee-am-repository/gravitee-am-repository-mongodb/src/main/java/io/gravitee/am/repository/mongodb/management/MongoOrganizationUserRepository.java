@@ -48,7 +48,7 @@ public class MongoOrganizationUserRepository extends AbstractUserRepository<Orga
     protected User convert(OrganizationUserMongo userMongo) {
         User user = super.convert(userMongo);
         // organization user may have password if it belongs to the gravitee idp.
-        if (IDP_GRAVITEE.equals(userMongo.getSource())) {
+        if (IDP_GRAVITEE.equals(userMongo.getSource()) && !Boolean.TRUE.equals(userMongo.getServiceAccount())) {
             user.setPassword(userMongo.getPassword());
         }
         return user;
@@ -70,7 +70,7 @@ public class MongoOrganizationUserRepository extends AbstractUserRepository<Orga
     @Override
     protected ArrayList<Bson> generateUserUpdates(User item, UpdateActions actions) {
         var updates = super.generateUserUpdates(item, actions);
-        if (IDP_GRAVITEE.equals(item.getSource())) {
+        if (IDP_GRAVITEE.equals(item.getSource()) && !Boolean.TRUE.equals(item.getServiceAccount())) {
             updates.add(Updates.set("password", item.getPassword()));
         }
         return updates;
