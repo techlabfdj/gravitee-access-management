@@ -311,7 +311,7 @@ public class UserAuthenticationManagerImpl implements UserAuthenticationManager 
             var templateEngine = authentication.getContext().getTemplateEngine();
             return templateEngine != null && templateEngine.getValue(rule.trim(), Boolean.class);
         } catch (Exception e) {
-            logger.warn("Cannot evaluate the expression [{}] as boolean", rule);
+            logger.warn("Cannot evaluate the expression [{}] as boolean", rule, e);
             return false;
         }
     }

@@ -130,15 +130,15 @@ public class IdentityProviderManagerImpl extends AbstractService implements Iden
         if (event.content().getReferenceType() == ReferenceType.DOMAIN && domain.getId().equals(event.content().getReferenceId())) {
             gatewayMetricProvider.incrementIdpEvt();
             switch (event.type()) {
-                case DEPLOY:
-                    gatewayMetricProvider.incrementIdp();
-                case UPDATE:
-                    updateIdentityProvider(event.content().getId(), event.type());
-                    break;
-                case UNDEPLOY:
+                case DEPLOY -> gatewayMetricProvider.incrementIdp();
+                case UPDATE -> updateIdentityProvider(event.content().getId(), event.type());
+                case UNDEPLOY -> {
                     removeIdentityProvider(event.content().getId());
                     gatewayMetricProvider.decrementIdp();
-                    break;
+                }
+                default -> {
+                    // No action needed for default case
+                }
             }
         }
     }
@@ -225,8 +225,9 @@ public class IdentityProviderManagerImpl extends AbstractService implements Iden
     }
 
     /**
-     * @param provider
-     * @return true if the IDP has never been deployed or if the deployed version is not up to date
+     * @param provider the {@link IdentityProvider} to check for deployment
+     * @return {@code true} if the IDP has never been deployed or if the deployed version is not up to date,
+     *         {@code false} otherwise
      */
     private boolean needDeployment(IdentityProvider provider) {
         final IdentityProvider deployedProvider = this.identities.get(provider.getId());
