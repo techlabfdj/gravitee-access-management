@@ -17,18 +17,23 @@ package io.gravitee.am.management.service.impl.upgrades;
 
 import io.gravitee.am.model.Domain;
 import io.gravitee.am.model.oauth2.Scope;
-import io.gravitee.am.service.*;
+import io.gravitee.am.service.ApplicationService;
+import io.gravitee.am.service.DomainService;
+import io.gravitee.am.service.RoleService;
+import io.gravitee.am.service.ScopeService;
 import io.gravitee.am.service.model.NewScope;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.gravitee.am.management.service.impl.upgrades.UpgraderOrder.SCOPE_UPGRADER;
@@ -39,32 +44,24 @@ import static io.gravitee.am.management.service.impl.upgrades.UpgraderOrder.SCOP
  * @author GraviteeSource Team
  */
 @Component
-public class ScopeUpgrader implements Upgrader, Ordered {
+@RequiredArgsConstructor
+public class ScopeUpgrader extends AsyncUpgrader {
 
     /**
      * Logger.
      */
     private final Logger logger = LoggerFactory.getLogger(ScopeUpgrader.class);
 
-    @Autowired
-    private DomainService domainService;
-
-    @Autowired
-    private ScopeService scopeService;
-
-    @Autowired
-    private ApplicationService applicationService;
-
-    @Autowired
-    private RoleService roleService;
+    private final DomainService domainService;
+    private final ScopeService scopeService;
+    private final ApplicationService applicationService;
+    private final RoleService roleService;
 
     @Override
-    public boolean upgrade() {
+    public Completable doUpgrade() {
         logger.info("Applying scope upgrade");
-        domainService.listAll()
-                .flatMapSingle(domain -> upgradeDomain(domain))
-                .subscribe();
-        return true;
+        return Completable.fromPublisher(domainService.listAll()
+                .flatMapSingle(this::upgradeDomain));
     }
 
     private Single<List<Scope>> upgradeDomain(Domain domain) {
@@ -83,8 +80,8 @@ public class ScopeUpgrader implements Upgrader, Ordered {
 
     private Single<List<Scope>> createAppScopes(Domain domain) {
         return applicationService.findByDomain(domain.getId())
-                .filter(applications -> applications != null)
-                .flatMapObservable(applications -> Observable.fromIterable(applications))
+                .filter(Objects::nonNull)
+                .flatMapObservable(Observable::fromIterable)
                 .filter(app -> app.getSettings() != null && app.getSettings().getOauth() != null)
                 .flatMap(app -> Observable.fromIterable(app.getSettings().getOauth().getScopes()))
                 .flatMapSingle(scope -> createScope(domain.getId(), scope))
@@ -93,8 +90,8 @@ public class ScopeUpgrader implements Upgrader, Ordered {
 
     private Single<List<Scope>> createRoleScopes(Domain domain) {
         return roleService.findByDomain(domain.getId())
-                .filter(roles -> roles != null)
-                .flatMapObservable(roles -> Observable.fromIterable(roles))
+                .filter(Objects::nonNull)
+                .flatMapObservable(Observable::fromIterable)
                 .filter(role -> role.getOauthScopes() != null)
                 .flatMap(role -> Observable.fromIterable(role.getOauthScopes()))
                 .flatMapSingle(scope -> createScope(domain.getId(), scope))
@@ -105,7 +102,7 @@ public class ScopeUpgrader implements Upgrader, Ordered {
         return scopeService.findByDomain(domain, 0, Integer.MAX_VALUE)
                 .flatMap(scopes -> {
                     Optional<Scope> optScope = scopes.getData().stream().filter(scope -> scope.getKey().equalsIgnoreCase(scopeKey)).findFirst();
-                    if (!optScope.isPresent()) {
+                    if (optScope.isEmpty()) {
                         logger.info("Create a new scope key[{}] for domain[{}]", scopeKey, domain);
                         NewScope scope = new NewScope();
                         scope.setKey(scopeKey);
