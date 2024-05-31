@@ -51,7 +51,7 @@ public class ClientTest {
 
         Client to = from.clone();
         //client name
-        assertTrue("same name", from.getClientName().equals(to.getClientName()));
+        assertEquals("same name", from.getClientName(), to.getClientName());
 
         //redirect uris
         assertTrue("same redirect uris size", to.getRedirectUris() != null && to.getRedirectUris().size() == from.getRedirectUris().size());

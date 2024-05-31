@@ -23,7 +23,6 @@ import io.gravitee.am.management.handlers.management.api.authentication.http.Jet
 import io.gravitee.am.management.handlers.management.api.authentication.manager.idp.IdentityProviderManager;
 import io.gravitee.am.management.handlers.management.api.authentication.provider.generator.JWTGenerator;
 import io.gravitee.am.management.handlers.management.api.authentication.provider.security.EndUserAuthentication;
-import io.gravitee.am.management.handlers.management.api.authentication.service.AuthenticationService;
 import io.gravitee.am.model.IdentityProvider;
 import io.gravitee.am.model.ReferenceType;
 import org.slf4j.Logger;
@@ -42,7 +41,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -110,7 +108,7 @@ public class SocialAuthenticationFilter extends AbstractAuthenticationProcessing
             // set user identity provider source
             Map<String, String> details = new LinkedHashMap<>();
             details.put(SOURCE, providerId);
-            details.put(Claims.organization, identityProvider.getReferenceId());
+            details.put(Claims.ORGANIZATION, identityProvider.getReferenceId());
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, provAuthentication.getCredentials(), AuthorityUtils.NO_AUTHORITIES);
             usernamePasswordAuthenticationToken.setDetails(details);
             return usernamePasswordAuthenticationToken;

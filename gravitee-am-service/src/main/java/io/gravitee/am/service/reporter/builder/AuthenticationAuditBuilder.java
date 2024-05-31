@@ -21,7 +21,6 @@ import io.gravitee.am.common.jwt.Claims;
 import io.gravitee.am.common.oidc.StandardClaims;
 import io.gravitee.am.identityprovider.api.Authentication;
 import io.gravitee.am.model.User;
-import io.gravitee.am.model.ReferenceType;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -36,11 +35,11 @@ public class AuthenticationAuditBuilder extends AuditBuilder<AuthenticationAudit
 
     public AuthenticationAuditBuilder principal(Authentication principal) {
         if (principal != null) {
-            if (principal.getContext().get(Claims.ip_address) != null) {
-                ipAddress((String) principal.getContext().get(Claims.ip_address));
+            if (principal.getContext().get(Claims.IP_ADDRESS) != null) {
+                ipAddress((String) principal.getContext().get(Claims.IP_ADDRESS));
             }
-            if (principal.getContext().get(Claims.user_agent) != null) {
-                userAgent((String) principal.getContext().get(Claims.user_agent));
+            if (principal.getContext().get(Claims.USER_AGENT) != null) {
+                userAgent((String) principal.getContext().get(Claims.USER_AGENT));
             }
 
             setActor(null, EntityType.USER, (String) principal.getPrincipal(), null, null, null);

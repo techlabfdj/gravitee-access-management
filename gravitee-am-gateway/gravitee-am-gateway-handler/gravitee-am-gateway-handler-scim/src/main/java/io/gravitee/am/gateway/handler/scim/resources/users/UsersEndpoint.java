@@ -34,6 +34,7 @@ import io.reactivex.rxjava3.core.Maybe;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.rxjava3.ext.web.RoutingContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,7 @@ import static io.gravitee.am.common.utils.ConstantKeys.CLIENT_CONTEXT_KEY;
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
  * @author GraviteeSource Team
  */
+@Slf4j
 public class UsersEndpoint extends AbstractUserEndpoint {
 
     private static final int MAX_ITEMS_PER_PAGE = 100;
@@ -67,6 +69,7 @@ public class UsersEndpoint extends AbstractUserEndpoint {
             final String startIndex = context.request().getParam("startIndex");
             page = Integer.valueOf(startIndex);
         } catch (Exception ex) {
+            // No error catch.
         }
         // Non-negative integer. Specifies the desired  results per page, e.g., 10.
         // A negative value SHALL be interpreted as "0".
@@ -75,7 +78,7 @@ public class UsersEndpoint extends AbstractUserEndpoint {
             final String count = context.request().getParam("count");
             size = Integer.min(Integer.valueOf(count), MAX_ITEMS_PER_PAGE);
         } catch (Exception ex) {
-
+            // No error catch.
         }
 
         // Filter results
@@ -142,7 +145,7 @@ public class UsersEndpoint extends AbstractUserEndpoint {
      */
     public void create(RoutingContext context) {
         try {
-            final String body = context.getBodyAsString();
+            final String body = context.body().asString();
             if (body == null) {
                 context.fail(new InvalidSyntaxException("Unable to parse body message"));
                 return;
