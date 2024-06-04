@@ -46,7 +46,6 @@ import jakarta.ws.rs.core.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -96,7 +95,7 @@ public class AuditsResource extends AbstractResource {
                             if (hasPermission) {
                                 return auditPage;
                             } else {
-                                return new Page<>(auditPage.getData().stream().map(FilterUtils::filterAuditInfos).collect(Collectors.toList()), auditPage.getCurrentPage(), auditPage.getTotalCount());
+                                return new Page<>(auditPage.getData().stream().map(FilterUtils::filterAuditInfos).toList(), auditPage.getCurrentPage(), auditPage.getTotalCount());
                             }
                         })))
                 .subscribe(response::resume, response::resume);

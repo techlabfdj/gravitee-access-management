@@ -315,7 +315,7 @@ public class ScopeServiceImpl implements ScopeService {
                                 roleService.findByDomain(scope.getDomain())
                                         .flatMapObservable(roles -> Observable.fromIterable(roles.stream()
                                                 .filter(role -> role.getOauthScopes() != null && role.getOauthScopes().contains(scope.getKey()))
-                                                .collect(Collectors.toList())))
+                                                .toList()))
                                         .flatMapSingle(role -> {
                                             role.getOauthScopes().remove(scope.getKey());
                                             UpdateRole updatedRole = new UpdateRole();
@@ -339,10 +339,10 @@ public class ScopeServiceImpl implements ScopeService {
                                                             ApplicationOAuthSettings oAuthSettings = application.getSettings().getOauth();
                                                             return oAuthSettings.getScopeSettings() != null && !oAuthSettings.getScopeSettings().stream().filter(s -> s.getScope().equals(scope.getKey())).findFirst().isEmpty();
                                                         })
-                                                        .collect(Collectors.toList())))
+                                                        .toList()))
                                                 .flatMapSingle(application -> {
                                                     // Remove scope from application
-                                                    final List<ApplicationScopeSettings> cleanScopes = application.getSettings().getOauth().getScopeSettings().stream().filter(s -> !s.getScope().equals(scope.getKey())).collect(Collectors.toList());
+                                                    final List<ApplicationScopeSettings> cleanScopes = application.getSettings().getOauth().getScopeSettings().stream().filter(s -> !s.getScope().equals(scope.getKey())).toList();
                                                     application.getSettings().getOauth().setScopeSettings(cleanScopes);
                                                     // Then update
                                                     return applicationService.update(application);

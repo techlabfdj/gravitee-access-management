@@ -215,9 +215,9 @@ public class MembershipServiceImpl implements MembershipService {
             return Single.just(Collections.emptyMap());
         }
 
-        List<String> userIds = memberships.stream().filter(membership -> MemberType.USER.equals(membership.getMemberType())).map(Membership::getMemberId).distinct().collect(Collectors.toList());
-        List<String> groupIds = memberships.stream().filter(membership -> MemberType.GROUP.equals(membership.getMemberType())).map(Membership::getMemberId).distinct().collect(Collectors.toList());
-        List<String> roleIds = memberships.stream().map(Membership::getRoleId).distinct().collect(Collectors.toList());
+        List<String> userIds = memberships.stream().filter(membership -> MemberType.USER.equals(membership.getMemberType())).map(Membership::getMemberId).distinct().toList();
+        List<String> groupIds = memberships.stream().filter(membership -> MemberType.GROUP.equals(membership.getMemberType())).map(Membership::getMemberId).distinct().toList();
+        List<String> roleIds = memberships.stream().map(Membership::getRoleId).distinct().toList();
 
         return Single.zip(orgUserService.findByIdIn(userIds).toMap(io.gravitee.am.model.User::getId, this::convert),
                 groupService.findByIdIn(groupIds).toMap(Group::getId, g -> this.convert(g)),

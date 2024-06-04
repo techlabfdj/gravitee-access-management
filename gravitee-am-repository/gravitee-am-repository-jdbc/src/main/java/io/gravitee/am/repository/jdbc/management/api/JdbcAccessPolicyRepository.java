@@ -39,7 +39,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.springframework.data.relational.core.query.Criteria.where;
 import static org.springframework.data.relational.core.query.Query.query;
@@ -83,11 +82,11 @@ public class JdbcAccessPolicyRepository extends AbstractJdbcRepository implement
             COL_CREATED_AT,
             COL_UPDATED_AT);
 
-    private String INSERT_STATEMENT;
+    private String insertStatement;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.INSERT_STATEMENT = createInsertStatement("uma_access_policies", columns);
+        this.insertStatement = createInsertStatement("uma_access_policies", columns);
     }
 
     @Override
@@ -98,7 +97,7 @@ public class JdbcAccessPolicyRepository extends AbstractJdbcRepository implement
                         query(where(COL_DOMAIN).is(domain))
                                 .sort(Sort.by(Sort.Order.desc(COL_UPDATED_AT)))
                                 .with(PageRequest.of(page, size))).all()).toList()
-                .map(content -> content.stream().map(this::toAccessPolicy).collect(Collectors.toList()))
+                .map(content -> content.stream().map(this::toAccessPolicy).toList())
                 .flatMap(content -> accessPolicyRepository.countByDomain(domain)
                         .map((count) -> new Page<>(content, page, count)));
     }
@@ -133,7 +132,7 @@ public class JdbcAccessPolicyRepository extends AbstractJdbcRepository implement
         item.setId(item.getId() == null ? RandomString.generate() : item.getId());
         LOGGER.debug("create AccessPolicy with id {}", item.getId());
 
-        DatabaseClient.GenericExecuteSpec sql = getTemplate().getDatabaseClient().sql(INSERT_STATEMENT);
+        DatabaseClient.GenericExecuteSpec sql = getTemplate().getDatabaseClient().sql(insertStatement);
         sql = addQuotedField(sql, COL_ID, item.getId(), String.class);
         sql = addQuotedField(sql, COL_TYPE, item.getType() == null ? null : item.getType().name(), String.class);
         sql = addQuotedField(sql, COL_ENABLED, item.isEnabled(), Boolean.class);

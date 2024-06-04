@@ -118,7 +118,7 @@ public class ApplicationsResource extends AbstractResource {
                                         .map(application -> hasAnyPermission(authenticatedUser, organizationId, environmentId, domain, application.getId(), Permission.APPLICATION, Acl.READ)
                                                 .filter(Boolean::booleanValue)
                                                 .map(__ -> filterApplicationInfos(application)))
-                                        .collect(toList()))
+                                        .toList())
                                 .sorted((a1, a2) -> a2.getUpdatedAt().compareTo(a1.getUpdatedAt()))
                                 .toList()
                                 .map(applications -> new ApplicationPage(

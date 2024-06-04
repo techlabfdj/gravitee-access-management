@@ -46,6 +46,7 @@ import static reactor.adapter.rxjava.RxJava3Adapter.fluxToFlowable;
 @Setter
 public abstract class AbstractDialect implements DialectHelper {
 
+    public static final String STATUS = "status";
     private String auditsTable;
     private String auditAccessPointsTable;
     private String auditOutcomesTable;
@@ -237,7 +238,7 @@ public abstract class AbstractDialect implements DialectHelper {
     }
 
     protected Map<String, Object> toHistogramSlotValue(Row row, RowMetadata rowMetadata) {
-        return Map.of("slot", row.get("slot"), "status", row.get("status"), "attempts", row.get("attempts"));
+        return Map.of("slot", row.get("slot"), STATUS, row.get(STATUS), "attempts", row.get("attempts"));
     }
 
 }

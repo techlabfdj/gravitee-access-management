@@ -23,6 +23,9 @@ import io.gravitee.plugin.core.api.Plugin;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +55,7 @@ public class ReporterPluginServiceImpl extends AbstractPluginService implements 
         LOGGER.debug("List all reporter plugins");
         return Observable.fromIterable(reporterPluginManager.findAll(true))
                 .map(this::convert)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

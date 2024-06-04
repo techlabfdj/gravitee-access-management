@@ -61,8 +61,6 @@ import java.util.stream.Stream;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -97,7 +95,7 @@ public class FlowServiceImpl implements FlowService {
                     return Stream.of(Type.values())
                         .map(type -> ofNullable(flows.get(type)).orElse(List.of(buildFlow(type, referenceType, referenceId))))
                         .flatMap(c -> c.stream())
-                        .collect(toList());
+                        .toList();
                     }
                 )
                 .switchIfEmpty(Flowable.fromIterable(defaultFlows(referenceType, referenceId)))
@@ -125,7 +123,7 @@ public class FlowServiceImpl implements FlowService {
                             });
                         })
                         .flatMap(c -> c.stream())
-                        .collect(toList())
+                        .toList()
                 )
                 .switchIfEmpty(Flowable.fromIterable(defaultFlows(referenceType, referenceId))
                         .map(flow -> {
@@ -143,7 +141,7 @@ public class FlowServiceImpl implements FlowService {
     public List<Flow> defaultFlows(ReferenceType referenceType, String referenceId) {
         return Stream.of(Type.values())
                 .map(type -> buildFlow(type, referenceType, referenceId))
-                .collect(toUnmodifiableList());
+                .toList();
     }
 
     @Override

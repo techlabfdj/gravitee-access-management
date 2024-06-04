@@ -192,7 +192,7 @@ public class MFAEnrollEndpoint extends AbstractEndpoint implements Handler<Routi
         List<Factor> evaluatedFactors = factors.stream()
                 .filter(factor -> !factor.factorType.equals(FactorType.RECOVERY_CODE.getType()))
                 .filter(factor -> mfaContext.evaluateFactorRuleByFactorId(factor.getId()))
-                .toList();
+                .collect(Collectors.toList());
 
         if (evaluatedFactors.isEmpty()) {
             return factors.stream()
@@ -354,7 +354,7 @@ public class MFAEnrollEndpoint extends AbstractEndpoint implements Handler<Routi
                 .flatMapSingle(entry -> entry.getValue().enroll(factorContext)
                         .map(enrollment -> new Factor(entry.getKey(), enrollment))
                 )
-                .toList()
+                .collect(Collectors.toList())
                 .subscribe(
                         factors -> handler.handle(Future.succeededFuture(factors)),
                         error -> handler.handle(Future.failedFuture(error)));

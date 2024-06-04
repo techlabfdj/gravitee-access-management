@@ -17,7 +17,6 @@ package io.gravitee.am.model.permissions;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -55,6 +54,6 @@ public enum RolePermissionAction {
     }
 
     public static List<String> actions() {
-        return Arrays.asList(values()).stream().map(RolePermissionAction::getMask).collect(Collectors.toList());
+        return Arrays.asList(values()).stream().map(RolePermissionAction::getMask).toList();
     }
 }

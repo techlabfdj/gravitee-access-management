@@ -141,8 +141,8 @@ public class ResourceServiceImpl implements ResourceService {
             return Single.just(Collections.emptyMap());
         }
 
-        List<String> userIds = resources.stream().filter(resource -> resource.getUserId() != null).map(Resource::getUserId).distinct().collect(Collectors.toList());
-        List<String> appIds = resources.stream().filter(resource -> resource.getClientId() != null).map(Resource::getClientId).distinct().collect(Collectors.toList());
+        List<String> userIds = resources.stream().filter(resource -> resource.getUserId() != null).map(Resource::getUserId).distinct().toList();
+        List<String> appIds = resources.stream().filter(resource -> resource.getClientId() != null).map(Resource::getClientId).distinct().toList();
         return Single.zip(userService.findByIdIn(userIds).toMap(User::getId, this::filter),
                 applicationService.findByIdIn(appIds).toMap(Application::getId, this::filter), (users, apps) -> {
             Map<String, Map<String, Object>> metadata = new HashMap<>();
@@ -353,7 +353,7 @@ public class ResourceServiceImpl implements ResourceService {
             return Single.error(new MissingScopeException());
         }
         //Make sure they are distinct
-        toValidate.setResourceScopes(toValidate.getResourceScopes().stream().distinct().collect(Collectors.toList()));
+        toValidate.setResourceScopes(toValidate.getResourceScopes().stream().distinct().toList());
 
         return scopeService.findByDomainAndKeys(toValidate.getDomain(), toValidate.getResourceScopes())
                 .flatMap(scopes -> {

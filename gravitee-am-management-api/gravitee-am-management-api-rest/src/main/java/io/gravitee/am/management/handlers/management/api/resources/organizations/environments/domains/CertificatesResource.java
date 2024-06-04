@@ -137,7 +137,7 @@ public class CertificatesResource extends AbstractResource {
                         .map(cert -> this.filterCertificateInfos(cert, certificateExpiryThresholds.get(0)))
                         .flatMapSingle(this::addApplications)
                         .sorted((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName()))
-                        .toList()
+                        .collect(Collectors.toList())
                         .map(sortedCertificates -> {
 
                             // compute RENEWED status for System certificates

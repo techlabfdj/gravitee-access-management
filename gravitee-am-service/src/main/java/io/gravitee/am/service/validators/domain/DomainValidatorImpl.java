@@ -27,7 +27,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -73,7 +72,7 @@ public class DomainValidatorImpl implements DomainValidator {
 
             chain.addAll(domain.getVhosts().stream()
                     .map(vhost -> virtualHostValidator.validate(vhost, domainRestrictions))
-                    .collect(Collectors.toList()));
+                    .toList());
         } else {
             if ("/".equals(domain.getPath())) {
                 return Completable.error(new InvalidDomainException("'/' path is not allowed in context-path mode"));
@@ -87,7 +86,7 @@ public class DomainValidatorImpl implements DomainValidator {
                     .getCertificates()
                     .values()
                     .stream()
-                    .anyMatch(cert -> !(cert instanceof String) || (((String) cert).startsWith("-----") || ((String) cert).endsWith("-----")));
+                    .anyMatch(cert -> !(cert instanceof String certificate) || (certificate.startsWith("-----") || certificate.endsWith("-----")));
             if (containsInvalidCertFormat) {
                 return Completable.error(new InvalidDomainException("WebAuthnSettings contains certificates with boundaries"));
             }

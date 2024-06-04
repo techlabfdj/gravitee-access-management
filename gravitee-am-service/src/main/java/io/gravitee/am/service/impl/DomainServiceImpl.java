@@ -92,6 +92,9 @@ import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.rxjava3.core.MultiMap;
+
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +112,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static io.gravitee.am.common.web.UriBuilder.isHttp;
 import static io.gravitee.am.model.ReferenceType.DOMAIN;
@@ -129,6 +131,7 @@ public class DomainServiceImpl implements DomainService {
      * Arbitrarily fix the maximum value to 2048 characters that seems enough to display a message on a mobile device.
      */
     private static final int CIBA_MAX_BINDING_MESSAGE_LENGTH = 2048;
+    public static final String IS_MALFORMED = " is malformed";
 
     private final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
 
@@ -741,7 +744,7 @@ public class DomainServiceImpl implements DomainService {
                     final URI uri = logoutRedirectUri.contains("*") ? new URI(logoutRedirectUri) : UriBuilder.fromURIString(logoutRedirectUri).build();
 
                     if (uri.getScheme() == null) {
-                        throw new InvalidTargetUrlException("post_logout_redirect_uri : " + logoutRedirectUri + " is malformed");
+                        throw new InvalidTargetUrlException("post_logout_redirect_uri : " + logoutRedirectUri + IS_MALFORMED);
                     }
 
                     final String host = isHttp(uri.getScheme()) ? uri.toURL().getHost() : uri.getHost();
@@ -764,7 +767,7 @@ public class DomainServiceImpl implements DomainService {
                         throw new InvalidTargetUrlException("post_logout_redirect_uri with fragment is forbidden");
                     }
                 } catch (IllegalArgumentException | URISyntaxException ex) {
-                    throw new InvalidTargetUrlException("post_logout_redirect_uri : " + logoutRedirectUri + " is malformed");
+                    throw new InvalidTargetUrlException("post_logout_redirect_uri : " + logoutRedirectUri + IS_MALFORMED);
                 }
             }
         }
@@ -778,7 +781,7 @@ public class DomainServiceImpl implements DomainService {
                     final URI uri = requestUri.contains("*") ? new URI(requestUri) : UriBuilder.fromURIString(requestUri).build();
 
                     if (uri.getScheme() == null) {
-                        throw new InvalidRequestUriException("request_uri : " + requestUri + " is malformed");
+                        throw new InvalidRequestUriException("request_uri : " + requestUri + IS_MALFORMED);
                     }
 
                     final String host = isHttp(uri.getScheme()) ? uri.toURL().getHost() : uri.getHost();
@@ -797,7 +800,7 @@ public class DomainServiceImpl implements DomainService {
                         throw new InvalidRequestUriException("Wildcard are forbidden");
                     }
                 } catch (IllegalArgumentException | URISyntaxException ex) {
-                    throw new InvalidRequestUriException("request_uri : " + requestUri + " is malformed");
+                    throw new InvalidRequestUriException("request_uri : " + requestUri + IS_MALFORMED);
                 }
             }
         }
@@ -808,7 +811,7 @@ public class DomainServiceImpl implements DomainService {
         // Get environment domain restrictions and validate all data are correctly defined.
         return domainValidator.validate(domain, environment.getDomainRestrictions())
                 .andThen(listAll()
-                        .toList()
+                        .collect(Collectors.toList())
                         .flatMapCompletable(domains -> virtualHostValidator.validateDomainVhosts(domain, domains)));
     }
 

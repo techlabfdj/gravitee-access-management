@@ -211,7 +211,7 @@ public class UMATokenGranter extends AbstractTokenGranter {
         if (tokenRequest.getScopes() != null && !tokenRequest.getScopes().isEmpty()) {
             if (client.getScopeSettings() == null ||
                     client.getScopeSettings().isEmpty() ||
-                    !new HashSet<>(client.getScopeSettings().stream().map(ApplicationScopeSettings::getScope).toList()).containsAll(tokenRequest.getScopes())) {
+                    !new HashSet<>(client.getScopeSettings().stream().map(ApplicationScopeSettings::getScope).collect(Collectors.toList())).containsAll(tokenRequest.getScopes())) {
                 //TokenRequest scopes are not null and not empty, already did the check in earlier step.
                 return Single.error(new InvalidScopeException("At least one of the scopes included in the request does not match client pre-registered scopes"));
             }
@@ -225,7 +225,7 @@ public class UMATokenGranter extends AbstractTokenGranter {
                 .flatMap(permissionRequests -> {
                     List<String> resourceIds = permissionRequests.stream().map(PermissionRequest::getResourceId).collect(Collectors.toList());
                     return resourceService.findByResources(resourceIds)
-                            .toList()
+                            .collect(Collectors.toList())
                             .flatMap(resourceSet -> this.checkRequestedScopesMatchResource(tokenRequest, resourceSet))
                             .flatMap(resourceMap -> this.resolveScopeRequestAssessment(tokenRequest, permissionRequests, resourceMap))
                             .flatMap(resolvedPermissionRequests -> this.extendPermissionWithRPT(tokenRequest, client, endUser, resolvedPermissionRequests))
@@ -318,7 +318,7 @@ public class UMATokenGranter extends AbstractTokenGranter {
                                 Stream.concat(
                                         requestedPermission.getResourceScopes().stream(),
                                         fromRpt.getResourceScopes().stream()
-                                ).distinct().toList()//Keep distinct values
+                                ).distinct().collect(Collectors.toList())//Keep distinct values
                         );
                         return requestedPermission;
                     }))
@@ -394,7 +394,7 @@ public class UMATokenGranter extends AbstractTokenGranter {
                             .ifPresent(permissionRequest -> ((DefaultRule) rule).setMetadata(Collections.singletonMap("permissionRequest", permissionRequest)));
                     return rule;
                 })
-                .toList()
+                .collect(Collectors.toList())
                 .flatMap(rules -> {
                     // no policy registered, continue
                     if (rules.isEmpty()) {

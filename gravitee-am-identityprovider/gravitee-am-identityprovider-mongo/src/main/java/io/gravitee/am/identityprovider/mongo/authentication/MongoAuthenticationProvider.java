@@ -34,6 +34,9 @@ import io.gravitee.am.identityprovider.mongo.authentication.spring.MongoAuthenti
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
+
+import java.util.stream.Collectors;
+
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -78,7 +81,7 @@ public class MongoAuthenticationProvider extends MongoAbstractProvider implement
     public Maybe<User> loadUserByUsername(Authentication authentication) {
         String username = getSafeUsername((String) authentication.getPrincipal());
         return findUserByMultipleField(username)
-                .toList()
+                .collect(Collectors.toList())
                 .flatMapPublisher(users -> {
                     if (users.isEmpty()) {
                         return Flowable.error(new UsernameNotFoundException(username));
@@ -109,9 +112,9 @@ public class MongoAuthenticationProvider extends MongoAbstractProvider implement
 
                     return new UserCredentialEvaluation<>(true, user);
                 })
-                .toList()
+                .collect(Collectors.toList())
                 .flatMapMaybe(userEvaluations -> {
-                    final var validUsers = userEvaluations.stream().filter(UserCredentialEvaluation::isPasswordValid).toList();
+                    final var validUsers = userEvaluations.stream().filter(UserCredentialEvaluation::isPasswordValid).collect(Collectors.toList());
                     if (validUsers.size() > 1) {
                         LOGGER.debug("Authentication failed: multiple accounts with same credentials");
                         return Maybe.error(new BadCredentialsException("Bad credentials"));

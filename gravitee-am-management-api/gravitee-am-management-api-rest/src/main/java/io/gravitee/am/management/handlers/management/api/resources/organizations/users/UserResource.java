@@ -57,6 +57,9 @@ import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
@@ -143,7 +146,7 @@ public class UserResource extends AbstractResource {
             @Suspended final AsyncResponse response) {
 
         checkPermission(ReferenceType.ORGANIZATION, organizationId, Permission.ORGANIZATION_USER, Acl.READ)
-                .andThen(organizationUserService.findAccountAccessTokens(organizationId, user).toList())
+                .andThen(organizationUserService.findAccountAccessTokens(organizationId, user).collect(Collectors.toList()))
                 .subscribe(response::resume, response::resume);
     }
 

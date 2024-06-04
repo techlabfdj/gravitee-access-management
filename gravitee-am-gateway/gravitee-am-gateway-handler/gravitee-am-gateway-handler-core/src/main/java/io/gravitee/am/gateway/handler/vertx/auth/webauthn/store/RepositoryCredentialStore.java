@@ -118,19 +118,19 @@ public class RepositoryCredentialStore {
     private Single<List<Credential>> fetchCredentials(Authenticator query){
         if (query.getUserName() != null) {
             if (maxAllowCredentials > 0) {
-                return credentialService.findByUsername(ReferenceType.DOMAIN, domain.getId(), query.getUserName(), maxAllowCredentials).toList();
+                return credentialService.findByUsername(ReferenceType.DOMAIN, domain.getId(), query.getUserName(), maxAllowCredentials).collect(Collectors.toList());
             } else {
-                return credentialService.findByUsername(ReferenceType.DOMAIN, domain.getId(), query.getUserName()).toList();
+                return credentialService.findByUsername(ReferenceType.DOMAIN, domain.getId(), query.getUserName()).collect(Collectors.toList());
             }
         } else {
-            return credentialService.findByCredentialId(ReferenceType.DOMAIN, domain.getId(), query.getCredID()).toList();
+            return credentialService.findByCredentialId(ReferenceType.DOMAIN, domain.getId(), query.getCredID()).collect(Collectors.toList());
         }
     }
 
     public Completable store(Authenticator authenticator) {
 
         return credentialService.findByCredentialId(ReferenceType.DOMAIN, domain.getId(), authenticator.getCredID())
-                .toList()
+                .collect(Collectors.toList())
                 .flatMapCompletable(credentials -> {
                     if (credentials.isEmpty()) {
                         // no credential found, create it

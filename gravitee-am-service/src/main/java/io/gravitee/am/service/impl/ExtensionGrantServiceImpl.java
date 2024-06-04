@@ -51,7 +51,6 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -208,7 +207,7 @@ public class ExtensionGrantServiceImpl implements ExtensionGrantService {
                                             return extensionGrant;
                                         }
                                         // if clients use this grant_type, check it is the oldest one
-                                        Date minDate = Collections.min(extensionGrants.stream().map(ExtensionGrant::getCreatedAt).collect(Collectors.toList()));
+                                        Date minDate = Collections.min(extensionGrants.stream().map(ExtensionGrant::getCreatedAt).toList());
                                         if (extensionGrant.getCreatedAt().equals(minDate)) {
                                             throw new ExtensionGrantWithApplicationsException();
                                         } else {

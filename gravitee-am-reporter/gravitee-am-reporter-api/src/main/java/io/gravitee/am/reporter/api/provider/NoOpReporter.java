@@ -41,16 +41,17 @@ import java.util.Map;
  */
 public class NoOpReporter implements AuditReporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoOpReporter.class);
+    public static final String NOT_BOOTSTRAPPED = "NoOp Reporter call, real reporter not yet bootstrapped";
 
     @Override
     public Single<Page<Audit>> search(ReferenceType referenceType, String referenceId, AuditReportableCriteria criteria, int page, int size) {
-        LOGGER.debug("NoOp Reporter call, real reporter not yet bootstrapped");
+        LOGGER.debug(NOT_BOOTSTRAPPED);
         return Single.just(new Page<>(Collections.emptyList(), page, size));
     }
 
     @Override
     public Single<Map<Object, Object>> aggregate(ReferenceType referenceType, String referenceId, AuditReportableCriteria criteria, Type analyticsType) {
-        LOGGER.debug("NoOp Reporter call, real reporter not yet bootstrapped");
+        LOGGER.debug(NOT_BOOTSTRAPPED);
         switch (analyticsType) {
             case DATE_HISTO:
                 // just fill with default values mainly for UI purpose
@@ -71,7 +72,7 @@ public class NoOpReporter implements AuditReporter {
 
     @Override
     public Maybe<Audit> findById(ReferenceType referenceType, String referenceId, String id) {
-        LOGGER.debug("NoOp Reporter call, real reporter not yet bootstrapped");
+        LOGGER.debug(NOT_BOOTSTRAPPED);
         return Maybe.empty();
     }
 
@@ -82,7 +83,7 @@ public class NoOpReporter implements AuditReporter {
 
     @Override
     public void report(Reportable reportable) {
-        LOGGER.debug("NoOp Reporter call, real reporter not yet bootstrapped");
+        LOGGER.debug(NOT_BOOTSTRAPPED);
     }
 
     @Override

@@ -152,7 +152,7 @@ public class LoginSocialAuthenticationHandler implements Handler<RoutingContext>
                             .map(authorizeUrl -> new SocialProviderData(identityProvider, authorizeUrl))
                             .defaultIfEmpty(new SocialProviderData(identityProvider, null));
                 })
-                .toList()
+                .collect(Collectors.toList())
                 .subscribe(socialProviderData -> resultHandler.handle(Future.succeededFuture(socialProviderData)),
                         error -> resultHandler.handle(Future.failedFuture(error)));
     }

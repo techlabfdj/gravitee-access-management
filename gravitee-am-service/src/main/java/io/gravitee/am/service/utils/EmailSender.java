@@ -35,7 +35,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Utility class created to avoid duplication between {@link io.gravitee.am.service.impl.EmailServiceImpl} and the SmtpResourceProvider
@@ -97,7 +96,7 @@ public class EmailSender {
                     imageElement.attr("src", "cid:" + src);
                     return src;
                 })
-                .collect(Collectors.toList()));
+                .toList());
 
         final String html = document.html();
         mailMessage.setText(html, true);
@@ -105,7 +104,7 @@ public class EmailSender {
         for (final String res : resources) {
             if (res.startsWith("data:image/")) {
                 final String value = res.replaceFirst("^data:image/[^;]*;base64,?", "");
-                byte[] bytes = Base64.getDecoder().decode(value.getBytes("UTF-8"));
+                byte[] bytes = Base64.getDecoder().decode(value.getBytes(StandardCharsets.UTF_8));
                 mailMessage.addInline(res, new ByteArrayResource(bytes), extractMimeType(res));
             } else {
                 File file = new File(templatesPath, res);

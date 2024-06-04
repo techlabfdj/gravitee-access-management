@@ -31,7 +31,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -55,7 +54,7 @@ public class FactorsPluginResource {
         factorPluginService.findAll()
                 .map(authenticatorPlugins -> authenticatorPlugins.stream()
                         .sorted(Comparator.comparing(FactorPlugin::getName))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .subscribe(response::resume, response::resume);
     }
 

@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author Guillaume CUSNIEUX (guillaume.cusnieux at graviteesource.com)
@@ -101,7 +100,7 @@ public class SpelServiceImpl implements SpelService {
             .stream(securedMethodResolver.getMethods(classz))
             .filter(f -> Modifier.isPublic(f.getModifiers()))
             .map((Function<Method, Object>) method -> new MethodWrapper(method))
-            .collect(Collectors.toList());
+            .toList();
         type.put("methods", methods);
         return type;
     }
@@ -114,7 +113,7 @@ public class SpelServiceImpl implements SpelService {
             List<Object> params = Arrays
                 .stream(method.getParameters())
                 .map((Function<Parameter, Object>) parameter -> new ParameterWrapper(parameter))
-                .collect(Collectors.toList());
+                .toList();
             if (params.size() > 0) {
                 this.put("params", params);
             }

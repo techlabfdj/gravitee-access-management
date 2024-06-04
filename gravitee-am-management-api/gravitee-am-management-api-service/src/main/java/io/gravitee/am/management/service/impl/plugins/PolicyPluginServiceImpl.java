@@ -29,9 +29,11 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -61,7 +63,7 @@ public class PolicyPluginServiceImpl implements PolicyPluginService {
         LOGGER.debug("List all policy plugins");
         return Observable.fromIterable(policyPluginManager.getAll(true))
                 .map(policyPlugin -> convert(policyPlugin, expand))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

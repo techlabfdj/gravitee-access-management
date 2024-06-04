@@ -21,7 +21,13 @@ import io.gravitee.am.common.audit.EventType;
 import io.gravitee.am.common.audit.Status;
 import io.gravitee.am.management.service.AnalyticsService;
 import io.gravitee.am.management.service.AuditService;
-import io.gravitee.am.model.analytics.*;
+import io.gravitee.am.model.analytics.AnalyticsCountResponse;
+import io.gravitee.am.model.analytics.AnalyticsGroupByResponse;
+import io.gravitee.am.model.analytics.AnalyticsHistogramResponse;
+import io.gravitee.am.model.analytics.AnalyticsQuery;
+import io.gravitee.am.model.analytics.AnalyticsResponse;
+import io.gravitee.am.model.analytics.Bucket;
+import io.gravitee.am.model.analytics.Timestamp;
 import io.gravitee.am.reporter.api.audit.AuditReportableCriteria;
 import io.gravitee.am.service.ApplicationService;
 import io.gravitee.am.service.UserService;
@@ -107,8 +113,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 queryBuilder.field("accessPoint.id");
                 return executeGroupBy(query.getDomain(), queryBuilder.build(), query.getType())
                         .flatMap(analyticsResponse -> fetchMetadata((AnalyticsGroupByResponse) analyticsResponse));
-            case Field.USER_STATUS:
-            case Field.USER_REGISTRATION:
+        case Field.USER_STATUS, Field.USER_REGISTRATION:
                 return userService.statistics(query).map(AnalyticsGroupByResponse::new);
             default :
                 return executeGroupBy(query.getDomain(), queryBuilder.build(), query.getType());
@@ -130,7 +135,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                         })
                         .defaultIfEmpty(Collections.singletonMap((String) appId, getGenericMetadata("Deleted application", true)))
                         .toMaybe())
-                .toList()
+                .collect(Collectors.toList())
                 .map(result -> {
                     Map<String, Map<String, Object>> metadata = result.stream()
                             .flatMap(m -> m.entrySet().stream())

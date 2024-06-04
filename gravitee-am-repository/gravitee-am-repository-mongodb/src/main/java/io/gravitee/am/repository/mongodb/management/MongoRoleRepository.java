@@ -26,18 +26,27 @@ import io.gravitee.am.model.common.Page;
 import io.gravitee.am.model.permissions.Permission;
 import io.gravitee.am.repository.management.api.RoleRepository;
 import io.gravitee.am.repository.mongodb.management.internal.model.RoleMongo;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.core.Single;
+import jakarta.annotation.PostConstruct;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 
 /**
  * @author Titouan COMPIEGNE (david.brassely at graviteesource.com)
@@ -66,7 +75,7 @@ public class MongoRoleRepository extends AbstractManagementMongoRepository imple
     @Override
     public Single<Page<Role>> findAll(ReferenceType referenceType, String referenceId, int page, int size) {
         Single<Long> countOperation = Observable.fromPublisher(rolesCollection.countDocuments(and(eq(FIELD_REFERENCE_TYPE, referenceType.name()), eq(FIELD_REFERENCE_ID, referenceId)), countOptions())).first(0l);
-        Single<List<Role>> rolesOperation = Observable.fromPublisher(withMaxTime(rolesCollection.find(and(eq(FIELD_REFERENCE_TYPE, referenceType.name()), eq(FIELD_REFERENCE_ID, referenceId)))).sort(new BasicDBObject(FIELD_NAME, 1)).skip(size * page).limit(size)).map(this::convert).toList();
+        Single<List<Role>> rolesOperation = Observable.fromPublisher(withMaxTime(rolesCollection.find(and(eq(FIELD_REFERENCE_TYPE, referenceType.name()), eq(FIELD_REFERENCE_ID, referenceId)))).sort(new BasicDBObject(FIELD_NAME, 1)).skip(size * page).limit(size)).map(this::convert).collect(Collectors.toList());
         return Single.zip(countOperation, rolesOperation, (count, roles) -> new Page<>(roles, page, count));
     }
 
@@ -88,7 +97,7 @@ public class MongoRoleRepository extends AbstractManagementMongoRepository imple
                 searchQuery);
 
         Single<Long> countOperation = Observable.fromPublisher(rolesCollection.countDocuments(mongoQuery, countOptions())).first(0l);
-        Single<List<Role>> rolesOperation = Observable.fromPublisher(withMaxTime(rolesCollection.find(mongoQuery)).skip(size * page).limit(size)).map(this::convert).toList();
+        Single<List<Role>> rolesOperation = Observable.fromPublisher(withMaxTime(rolesCollection.find(mongoQuery)).skip(size * page).limit(size)).map(this::convert).collect(Collectors.toList());
         return Single.zip(countOperation, rolesOperation, (count, roles) -> new Page<>(roles, 0, count));
     }
 

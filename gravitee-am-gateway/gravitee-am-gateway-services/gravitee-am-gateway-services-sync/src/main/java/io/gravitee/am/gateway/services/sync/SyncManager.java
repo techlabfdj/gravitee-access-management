@@ -167,7 +167,7 @@ public class SyncManager implements InitializingBean {
 
                 final long from = (lastRefreshAt - lastDelay) - timeframeBeforeDelay;
                 final long to = nextLastRefreshAt + timeframeAfterDelay;
-                Single<List<Event>> findEvents = eventRepository.findByTimeFrame(from, to).toList();
+                Single<List<Event>> findEvents = eventRepository.findByTimeFrame(from, to).collect(Collectors.toList());
                 if (this.eventsTimeOut > 0) {
                     findEvents = findEvents.timeout(this.eventsTimeOut, TimeUnit.MILLISECONDS);
                 }
@@ -203,7 +203,7 @@ public class SyncManager implements InitializingBean {
                 .filter(Domain::isEnabled)
                 // Can the security domain be deployed ?
                 .filter(this::canHandle)
-                .toList();
+                .collect(Collectors.toList());
         if (this.initDomainTimeOut > 0) {
             findDomains = findDomains.timeout(this.initDomainTimeOut, TimeUnit.MILLISECONDS);
         }

@@ -15,21 +15,19 @@
  */
 package io.gravitee.am.management.service.impl.upgrades.helpers;
 
-import io.gravitee.am.model.*;
+import io.gravitee.am.model.Membership;
+import io.gravitee.am.model.Organization;
+import io.gravitee.am.model.ReferenceType;
+import io.gravitee.am.model.Role;
+import io.gravitee.am.model.User;
 import io.gravitee.am.model.membership.MemberType;
-import io.gravitee.am.model.permissions.DefaultRole;
 import io.gravitee.am.model.permissions.SystemRole;
 import io.gravitee.am.repository.management.api.search.MembershipCriteria;
 import io.gravitee.am.service.MembershipService;
 import io.gravitee.am.service.RoleService;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Maybe;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -90,7 +88,7 @@ public class MembershipHelper {
 
         MembershipCriteria criteria = new MembershipCriteria();
         criteria.setUserId(user.getId());
-        Boolean alreadyHasMembership = membershipService.findByCriteria(ReferenceType.ORGANIZATION, Organization.DEFAULT, criteria).count().map(count -> count > 0).blockingGet();
+        boolean alreadyHasMembership = membershipService.findByCriteria(ReferenceType.ORGANIZATION, Organization.DEFAULT, criteria).count().map(count -> count > 0).blockingGet();
 
         // If admin user already has a role on the default organization no need to do anything (either he is already admin, either someone decided to change his role).
         if (!alreadyHasMembership) {

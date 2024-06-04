@@ -50,6 +50,9 @@ import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
@@ -110,7 +113,7 @@ public class IdentityProvidersResource extends AbstractResource {
                         })
                         .map(this::filterIdentityProviderInfos)
                         .sorted((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.name(), o2.name()))
-                        .toList())
+                        .collect(Collectors.toList()))
                 .subscribe(response::resume, response::resume);
     }
 

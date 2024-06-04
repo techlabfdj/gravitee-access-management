@@ -23,16 +23,25 @@ import io.gravitee.am.model.common.Page;
 import io.gravitee.am.model.oauth2.Scope;
 import io.gravitee.am.repository.management.api.ScopeRepository;
 import io.gravitee.am.repository.mongodb.management.internal.model.ScopeMongo;
-import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import jakarta.annotation.PostConstruct;
+
+import java.util.stream.Collectors;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -80,7 +89,7 @@ public class MongoScopeRepository extends AbstractManagementMongoRepository impl
     public Single<Page<Scope>> findByDomain(String domain, int page, int size) {
         Bson mongoQuery = eq(FIELD_DOMAIN, domain);
         Single<Long> countOperation = Observable.fromPublisher(scopesCollection.countDocuments(mongoQuery, countOptions())).first(0l);
-        Single<List<Scope>> scopesOperation = Observable.fromPublisher(withMaxTime(scopesCollection.find(mongoQuery)).skip(size * page).limit(size)).map(this::convert).toList();
+        Single<List<Scope>> scopesOperation = Observable.fromPublisher(withMaxTime(scopesCollection.find(mongoQuery)).skip(size * page).limit(size)).map(this::convert).collect(Collectors.toList());
         return Single.zip(countOperation, scopesOperation, (count, scope) -> new Page<Scope>(scope, page, count));
     }
 
@@ -100,7 +109,7 @@ public class MongoScopeRepository extends AbstractManagementMongoRepository impl
                 eq(FIELD_DOMAIN, domain), searchQuery);
 
         Single<Long> countOperation = Observable.fromPublisher(scopesCollection.countDocuments(mongoQuery, countOptions())).first(0l);
-        Single<List<Scope>> scopesOperation = Observable.fromPublisher(withMaxTime(scopesCollection.find(mongoQuery)).sort(new BasicDBObject(FIELD_KEY, 1)).skip(size * page).limit(size)).map(this::convert).toList();
+        Single<List<Scope>> scopesOperation = Observable.fromPublisher(withMaxTime(scopesCollection.find(mongoQuery)).sort(new BasicDBObject(FIELD_KEY, 1)).skip(size * page).limit(size)).map(this::convert).collect(Collectors.toList());
         return Single.zip(countOperation, scopesOperation, (count, scopes) -> new Page<>(scopes, page, count));
     }
 

@@ -51,7 +51,6 @@ import jakarta.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -88,7 +87,7 @@ public class GroupsResource extends AbstractResource {
         checkPermission(ReferenceType.ORGANIZATION, organizationId, Permission.ORGANIZATION_GROUP, Acl.LIST)
                 .andThen(groupService.findAll(ReferenceType.ORGANIZATION, organizationId, page, Integer.min(size, MAX_GROUPS_SIZE_PER_PAGE))
                         .map(groupPage ->
-                                new GroupPage(groupPage.getData().stream().map(this::filterGroupInfos).collect(Collectors.toList()), groupPage.getCurrentPage(), groupPage.getTotalCount())))
+                                new GroupPage(groupPage.getData().stream().map(this::filterGroupInfos).toList(), groupPage.getCurrentPage(), groupPage.getTotalCount())))
                 .subscribe(response::resume, response::resume);
     }
 

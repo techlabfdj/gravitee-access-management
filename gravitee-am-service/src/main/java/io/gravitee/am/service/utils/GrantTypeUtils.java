@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static io.gravitee.am.common.oauth2.GrantType.AUTHORIZATION_CODE;
 import static io.gravitee.am.common.oauth2.GrantType.CIBA_GRANT_TYPE;
@@ -85,7 +84,7 @@ public class GrantTypeUtils {
         // Each security domain can have multiple extension grant with the same grant_type
         // we must split the client authorized grant types to get the real grant_type value
         ApplicationOAuthSettings oAuthSettings = application.getSettings().getOauth();
-        List<String> formattedClientGrantTypes = oAuthSettings.getGrantTypes() == null ? null : oAuthSettings.getGrantTypes().stream().map(str -> str.split(EXTENSION_GRANT_SEPARATOR)[0]).collect(Collectors.toList());
+        List<String> formattedClientGrantTypes = oAuthSettings.getGrantTypes() == null ? null : oAuthSettings.getGrantTypes().stream().map(str -> str.split(EXTENSION_GRANT_SEPARATOR)[0]).toList();
         if(!isSupportedGrantType(formattedClientGrantTypes)) {
             return Single.error(new InvalidClientMetadataException("Missing or invalid grant type."));
         }
@@ -124,7 +123,7 @@ public class GrantTypeUtils {
     }
 
     public static List<String> getSupportedGrantTypes() {
-        return Collections.unmodifiableList(SUPPORTED_GRANT_TYPES.stream().sorted().collect(Collectors.toList()));
+        return Collections.unmodifiableList(SUPPORTED_GRANT_TYPES.stream().sorted().toList());
     }
 
     /**
@@ -225,7 +224,7 @@ public class GrantTypeUtils {
 
         //if grant type list has been modified, then update it.
         else if(updatedGrantType) {
-            oAuthSettings.setGrantTypes((List<String>)grantType.stream().collect(Collectors.toList()));
+            oAuthSettings.setGrantTypes((List<String>)grantType.stream().toList());
         }
 
         return application;
@@ -277,7 +276,7 @@ public class GrantTypeUtils {
 
         //if grant type list has been modified, then update it.
         else if(updatedGrantType) {
-            client.setAuthorizedGrantTypes((List<String>)grantType.stream().collect(Collectors.toList()));
+            client.setAuthorizedGrantTypes((List<String>)grantType.stream().toList());
         }
 
         return client;

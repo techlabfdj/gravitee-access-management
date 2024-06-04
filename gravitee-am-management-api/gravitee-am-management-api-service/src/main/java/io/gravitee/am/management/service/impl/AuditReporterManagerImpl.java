@@ -41,6 +41,9 @@ import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.vertx.rxjava3.core.RxHelper;
 import io.vertx.rxjava3.core.Vertx;
+
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,7 +214,7 @@ public class AuditReporterManagerImpl extends AbstractService<AuditReporterManag
         // to propagate across the cluster so if there are at least one reporter for the domain, return the NoOpReporter to avoid
         // too long waiting time that may lead to unexpected even on the UI.
         try {
-            List<io.gravitee.am.model.Reporter> reporters = reporterService.findByDomain(domain).toList().blockingGet();
+            List<io.gravitee.am.model.Reporter> reporters = reporterService.findByDomain(domain).collect(Collectors.toList()).blockingGet();
             if (reporters.isEmpty()) {
                 throw new ReporterNotFoundForDomainException(domain);
             }
@@ -249,7 +252,7 @@ public class AuditReporterManagerImpl extends AbstractService<AuditReporterManag
                                         .entrySet()
                                         .stream()
                                         .filter(entry -> reporter.getId().equals(entry.getKey().getId()))
-                                        .map(entry -> entry.getValue())
+                                        .map(Entry::getValue)
                                         .findFirst()
                                         .ifPresentOrElse(auditReporter -> {
                                                     try {
@@ -335,7 +338,7 @@ public class AuditReporterManagerImpl extends AbstractService<AuditReporterManag
                     .entrySet()
                     .stream()
                     .filter(entry -> reporterId.equals(entry.getKey().getId()))
-                    .map(entry -> entry.getValue())
+                    .map(Entry::getValue)
                     .findFirst();
 
             if (optionalReporter.isPresent()) {

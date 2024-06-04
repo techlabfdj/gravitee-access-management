@@ -23,7 +23,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
@@ -51,8 +50,8 @@ public class UserFactorUpdater {
                                 factor.getChannel().setTarget(updatedUser.getEmail());
 
                             } else if (existingUser.getEmails() != null && updatedUser.getEmails() != null) {
-                                List<String> existingEmails = existingUser.getEmails().stream().map(Attribute::getValue).collect(Collectors.toList());
-                                List<String> updatedEmails = updatedUser.getEmails().stream().map(Attribute::getValue).collect(Collectors.toList());
+                                List<String> existingEmails = existingUser.getEmails().stream().map(Attribute::getValue).toList();
+                                List<String> updatedEmails = updatedUser.getEmails().stream().map(Attribute::getValue).toList();
                                 List<String> existingRemaining = new ArrayList<>(existingEmails);
                                 List<String> updatedRemaining = new ArrayList<>(updatedEmails);
                                 updatedEmails.forEach(existingRemaining::remove);

@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -133,7 +132,7 @@ public class GroupServiceImpl implements GroupService {
         LOGGER.debug("Find groups by member : {}", memberId);
         return groupRepository.findByMember(memberId)
                 .onErrorResumeNext(ex -> {
-                    LOGGER.error("An error occurs while trying to find a groups using member ", memberId, ex);
+                    LOGGER.error("An error occurs while trying to find a groups using member {} ", memberId, ex);
                     return Flowable.error(new TechnicalManagementException(
                             String.format("An error occurs while trying to find a user using member: %s", memberId), ex));
                 });
@@ -174,7 +173,7 @@ public class GroupServiceImpl implements GroupService {
                         return Single.just(new Page<>(null, page, 0));
                     } else {
                         // get members
-                        List<String> sortedMembers = group.getMembers().stream().sorted().collect(Collectors.toList());
+                        List<String> sortedMembers = group.getMembers().stream().sorted().toList();
                         final int startOffset = page * size;
                         final int endOffset = (page + 1) * size;
                         List<String> pagedMemberIds = sortedMembers.subList(Math.min(sortedMembers.size(), startOffset), Math.min(sortedMembers.size(), endOffset));
@@ -202,9 +201,7 @@ public class GroupServiceImpl implements GroupService {
         return findByName(referenceType, referenceId, newGroup.getName())
                 .isEmpty()
                 .map(isEmpty -> {
-                    if (!isEmpty) {
-                        throw new GroupAlreadyExistsException(newGroup.getName());
-                    } else {
+                    if (isEmpty) {
                         String groupId = RandomString.generate();
                         Group group = new Group();
                         group.setId(groupId);
@@ -216,6 +213,8 @@ public class GroupServiceImpl implements GroupService {
                         group.setCreatedAt(new Date());
                         group.setUpdatedAt(group.getCreatedAt());
                         return group;
+                    } else {
+                        throw new GroupAlreadyExistsException(newGroup.getName());
                     }
                 })
                 .flatMap(this::setMembers)
@@ -346,7 +345,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private Single<Group> setMembers(Group group) {
-        List<String> userMembers = group.getMembers() != null ? group.getMembers().stream().filter(Objects::nonNull).distinct().collect(Collectors.toList()) : null;
+        List<String> userMembers = group.getMembers() != null ? group.getMembers().stream().filter(Objects::nonNull).distinct().toList() : null;
         if (userMembers != null && !userMembers.isEmpty()) {
             CommonUserService service = (group.getReferenceType() == ReferenceType.ORGANIZATION ? organizationUserService : userService);
             return service.findByIdIn(userMembers)
@@ -365,7 +364,7 @@ public class GroupServiceImpl implements GroupService {
                 .map(roles1 -> {
                     if (roles1.size() != roles.size()) {
                         // find difference between the two list
-                        roles.removeAll(roles1.stream().map(Role::getId).collect(Collectors.toList()));
+                        roles.removeAll(roles1.stream().map(Role::getId).toList());
                         throw new RoleNotFoundException(String.join(",", roles));
                     }
                     return roles1;

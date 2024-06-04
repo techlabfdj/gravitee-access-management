@@ -31,7 +31,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -54,7 +53,7 @@ public class ExtensionGrantsPluginResource {
         extensionGrantPluginService.findAll()
                 .map(extensionGrantPlugins -> extensionGrantPlugins.stream()
                         .sorted(Comparator.comparing(ExtensionGrantPlugin::getName))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .subscribe(response::resume, response::resume);
     }
 

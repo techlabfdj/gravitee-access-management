@@ -30,7 +30,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -94,7 +93,7 @@ public class WebClientBuilder {
                     .values()
                     .stream()
                     .map(String::valueOf)
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (url.contains("?")) {
                 // Remove the query part as it could contain invalid characters such as those used in El expression.

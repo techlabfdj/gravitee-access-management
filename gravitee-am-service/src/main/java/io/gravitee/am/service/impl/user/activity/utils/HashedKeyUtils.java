@@ -23,6 +23,10 @@ import java.util.regex.Pattern;
 
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import static org.apache.commons.codec.digest.Sha2Crypt.sha256Crypt;
 import static org.apache.commons.codec.digest.Sha2Crypt.sha512Crypt;
 
@@ -30,6 +34,7 @@ import static org.apache.commons.codec.digest.Sha2Crypt.sha512Crypt;
  * @author Rémi SULTAN (remi.sultan at graviteesource.com)
  * @author GraviteeSource Team
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HashedKeyUtils {
 
     static final String SHA256_PREFIX = "$5$";

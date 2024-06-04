@@ -42,7 +42,6 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -105,7 +104,7 @@ public class IdentityProviderPluginManagerImpl extends IdentityProviderPluginMan
                 new PropertiesBeanFactoryPostProcessor(graviteeProperties),
                 new VertxBeanFactoryPostProcessor(vertx),
                 new IdentityProviderEntityBeanFactoryPostProcessor(providerConfig.getIdentityProvider())
-        ).collect(toList());
+        ).toList();
 
         if (nonNull(providerConfig.getCertificateManager())) {
             postProcessors.add(new CertificateManagerBeanFactoryPostProcessor(providerConfig.getCertificateManager()));

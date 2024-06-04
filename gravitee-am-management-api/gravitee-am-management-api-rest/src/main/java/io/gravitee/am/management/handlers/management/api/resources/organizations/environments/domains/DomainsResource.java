@@ -47,10 +47,12 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Response;
+
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.stream.Collectors;
 
 import static io.gravitee.am.management.service.permissions.Permissions.of;
 import static io.gravitee.am.management.service.permissions.Permissions.or;
@@ -108,7 +110,7 @@ public class DomainsResource extends AbstractDomainResource {
                 .map(this::filterDomainInfos)
                 .sorted((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName()))
                 .toList()
-                .map(domains -> new Page<Domain>(domains.stream().skip((long) page * size).limit(size).collect(Collectors.toList()), page, domains.size()))
+                .map(domains -> new Page<>(domains.stream().skip((long) page * size).limit(size).collect(Collectors.toList()), page, domains.size()))
                 .subscribe(response::resume, response::resume);
     }
 

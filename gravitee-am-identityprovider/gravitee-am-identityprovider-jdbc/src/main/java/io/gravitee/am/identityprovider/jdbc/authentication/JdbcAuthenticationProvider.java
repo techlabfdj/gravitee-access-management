@@ -65,7 +65,7 @@ public class JdbcAuthenticationProvider extends JdbcAbstractProvider<Authenticat
         final String presentedPassword = authentication.getCredentials().toString();
 
         return selectUserByMultipleField(username)
-                .toList()
+                .collect(Collectors.toList())
                 .flatMapPublisher(users -> {
                     if (users.isEmpty()) {
                         return Flowable.error(new UsernameNotFoundException(username));

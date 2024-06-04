@@ -155,7 +155,7 @@ public class JdbcUserProvider extends JdbcAbstractProvider<UserProvider> impleme
                                         }
                                     })
                                     .doFinally(() -> Completable.fromPublisher(connection.close()).subscribe());
-                        }).toList()
+                        }).collect(Collectors.toList())
                         .map(__ -> this);
             } catch (Exception e) {
                 LOGGER.error("Unable to initialize the identity provider schema", e);
@@ -252,7 +252,7 @@ public class JdbcUserProvider extends JdbcAbstractProvider<UserProvider> impleme
 
                         return query(sql, args)
                                 .flatMap(Result::getRowsUpdated)
-                                .first(0l)
+                                .first(0L)
                                 .map(result -> user);
                     }
                 });

@@ -33,7 +33,6 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
@@ -58,7 +57,7 @@ public class ResourcesPluginResource {
         resourcePluginService.findAll(expand)
                 .map(resourcePlugins -> resourcePlugins.stream()
                         .sorted(Comparator.comparing(ResourcePlugin::getName))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .subscribe(response::resume, response::resume);
     }
 

@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Rémi SULTAN (remi.sultan at graviteesource.com)
@@ -39,7 +38,7 @@ public class EmailDomainValidatorImpl implements EmailDomainValidator {
         this.allowList = emailConfiguration.getAllowedFrom().stream()
                 .map(WildcardUtils::toRegex)
                 .map(Pattern::compile)
-                .collect(toList());
+                .toList();
     }
 
     @Override

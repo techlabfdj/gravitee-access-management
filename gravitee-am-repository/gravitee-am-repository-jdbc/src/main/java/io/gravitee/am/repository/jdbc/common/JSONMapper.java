@@ -26,12 +26,15 @@ import io.gravitee.am.model.jose.JWK;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
  * @author GraviteeSource Team
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JSONMapper {
 
     private static ObjectMapper mapper;
@@ -84,7 +87,7 @@ public class JSONMapper {
         String result = null;
         if (secretSettingsList != null) {
             try {
-                result = mapper.writeValueAsString(secretSettingsList.stream().map(JdbcApplicationSecretSettings::new).collect(Collectors.toList()));
+                result = mapper.writeValueAsString(secretSettingsList.stream().map(JdbcApplicationSecretSettings::new).toList());
             } catch (JsonProcessingException e) {
                 throw new JsonMapperException("Unable to serialize Bean " + secretSettingsList.getClass().getName(), e);
             }

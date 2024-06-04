@@ -159,7 +159,7 @@ public class ApplicationFlowsResource extends AbstractResource {
     private static List<Flow> convert(List<io.gravitee.am.service.model.Flow> flows) {
         return flows.stream()
                 .map(ApplicationFlowsResource::convert)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static Flow convert(io.gravitee.am.service.model.Flow flow) {

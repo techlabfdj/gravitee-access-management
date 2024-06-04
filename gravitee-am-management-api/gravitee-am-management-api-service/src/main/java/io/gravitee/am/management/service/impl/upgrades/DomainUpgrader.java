@@ -21,6 +21,9 @@ import io.gravitee.am.service.model.PatchDomain;
 import io.gravitee.am.service.model.openid.PatchClientRegistrationSettings;
 import io.gravitee.am.service.model.openid.PatchOIDCSettings;
 import io.reactivex.rxjava3.core.Single;
+
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +54,7 @@ public class DomainUpgrader implements Upgrader, Ordered {
         LOGGER.info("Applying domain upgrade");
         domainService.listAll()
                 .flatMapSingle(this::upgradeDomain)
-                .toList()
+                .collect(Collectors.toList())
                 .subscribe();
         return true;
 

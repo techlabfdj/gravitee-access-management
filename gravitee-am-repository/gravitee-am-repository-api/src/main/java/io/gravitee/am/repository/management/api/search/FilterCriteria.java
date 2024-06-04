@@ -20,7 +20,6 @@ import io.gravitee.am.common.scim.filter.Filter;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -93,13 +92,12 @@ public class FilterCriteria {
                         .toString()
                         .replace(Schema.SCHEMA_URI_USER + ":", "")
                         .replace(Schema.SCHEMA_URI_GROUP + ":", "") : null;
-        FilterCriteria filterCriteria = new FilterCriteria(
+        return new FilterCriteria(
                 scimFilter.getOperator().getValue(),
                 filterAttribute,
                 scimFilter.getFilterValue(),
                 scimFilter.isQuoteFilterValue(),
-                scimFilter.getFilterComponents() != null ? scimFilter.getFilterComponents().stream().map(FilterCriteria::convert).collect(Collectors.toList()) : null);
-        return filterCriteria;
+                scimFilter.getFilterComponents() != null ? scimFilter.getFilterComponents().stream().map(FilterCriteria::convert).toList() : null);
     }
 
     @Override
