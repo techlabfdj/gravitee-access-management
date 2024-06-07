@@ -72,11 +72,19 @@
     </modules>
 
     <properties>
+<<<<<<< HEAD
         <awaitility.version>4.2.0</awaitility.version>
         <gravitee-bom.version>6.0.47</gravitee-bom.version>
         <gravitee-common.version>2.1.0</gravitee-common.version>
         <gravitee-plugin.version>2.2.0</gravitee-plugin.version>
         <gravitee-node.version>4.6.2</gravitee-node.version>
+=======
+        <awaitility.version>4.2.1</awaitility.version>
+        <gravitee-bom.version>8.0.4</gravitee-bom.version>
+        <gravitee-common.version>4.2.0</gravitee-common.version>
+        <gravitee-plugin.version>4.0.3</gravitee-plugin.version>
+        <gravitee-node.version>5.14.6</gravitee-node.version>
+>>>>>>> c8db0f3ee0 (chore: bump gravitee-node version)
         <gravitee-reporter.version>1.17.1</gravitee-reporter.version>
         <gravitee-gateway-api.version>3.0.0</gravitee-gateway-api.version>
         <gravitee-expression-language.version>3.1.0</gravitee-expression-language.version>
