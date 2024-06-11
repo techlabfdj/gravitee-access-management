@@ -341,6 +341,7 @@ data:
       cookie-secure: {{ .Values.api.jwt.cookie.secure | default false }}
 
     {{- if .Values.userManagement }}
+<<<<<<< HEAD
     
     # User management configuration
     user:
@@ -390,6 +391,10 @@ data:
 {{ toYaml .Values.userManagement.mfaChallenge | indent 8 }}
     {{- end }}
 
+=======
+    user:
+{{ toYaml .Values.userManagement | indent 6 }}
+>>>>>>> 1569857873 (refactor: clean up backend II)
     {{- end }}
 
     # Gateway entry point used in emails

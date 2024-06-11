@@ -315,6 +315,7 @@ data:
       url: https://{{index .Values.gateway.ingress.hosts 0 }}{{ .Values.gateway.ingress.path }}
     {{- end }}
 
+<<<<<<< HEAD
    {{- if .Values.userManagement }}
     # User management configuration
     user:
@@ -359,6 +360,12 @@ data:
     {{- end }}
 
     {{- end }}
+=======
+  {{- if .Values.gateway.consent }}
+    consent:
+{{ toYaml .Values.gateway.consent | indent 6  }}
+  {{- end }}
+>>>>>>> 1569857873 (refactor: clean up backend II)
 
     {{- if or .Values.gateway.handlers }}
     handlers:
