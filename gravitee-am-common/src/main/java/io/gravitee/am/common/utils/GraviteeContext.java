@@ -15,10 +15,13 @@
  */
 package io.gravitee.am.common.utils;
 
+import lombok.ToString;
+
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
  * @author GraviteeSource Team
  */
+@ToString
 public class GraviteeContext {
     private final String organizationId;
     private final String environmentId;
