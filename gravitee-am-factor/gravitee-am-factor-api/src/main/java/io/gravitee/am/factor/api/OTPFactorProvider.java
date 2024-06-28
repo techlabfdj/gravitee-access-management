@@ -67,8 +67,14 @@ public abstract class OTPFactorProvider implements FactorProvider {
                     emitter.onError(new InvalidCodeException("Invalid 2FA Code"));
                 }
                 // get last connection date of the user to test code
+<<<<<<< HEAD
                 if (Instant.now().isAfter(Instant.ofEpochMilli(enrolledFactor.getSecurity().getData(FactorDataKeys.KEY_EXPIRE_AT, Long.class)))) {
                     emitter.onError(new InvalidCodeException("Invalid 2FA Code"));
+=======
+                Long expireAt = enrolledFactor.getSecurity().getData(FactorDataKeys.KEY_EXPIRE_AT, Long.class);
+                if (expireAt == null || Instant.now().isAfter(Instant.ofEpochMilli(expireAt))) {
+                    emitter.onError(invalid2faCodeException());
+>>>>>>> 59cb725acf (fix: added validation of OTP)
                 }
                 emitter.onComplete();
             } catch (Exception ex) {
