@@ -474,3 +474,10 @@ liquibase:
 #    algorithm: None
 #    properties:
 #      rounds: 10
+#domains:
+#  reporters:
+#    default:
+#      enabled: true
+#  identities:
+#    default:
+#      enabled: true

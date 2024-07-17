@@ -24,8 +24,8 @@ import io.gravitee.am.common.utils.GraviteeContext;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.common.web.UriBuilder;
 import io.gravitee.am.identityprovider.api.User;
+import io.gravitee.am.management.service.DefaultIdentityProviderService;
 import io.gravitee.am.management.service.DomainService;
-import io.gravitee.am.management.service.IdentityProviderManager;
 import io.gravitee.am.model.CorsSettings;
 import io.gravitee.am.model.Domain;
 import io.gravitee.am.model.DomainVersion;
@@ -139,7 +139,7 @@ import static java.util.Optional.ofNullable;
 @NoArgsConstructor
 public class DomainServiceImpl implements DomainService {
     /**
-     * According to https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#auth_request
+     * According to <a href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#auth_request">Auth request</a>
      * the binding_message value SHOULD be relatively short and use a limited set of plain text characters.
      * Arbitrarily fix the maximum value to 2048 characters that seems enough to display a message on a mobile device.
      */
@@ -250,11 +250,15 @@ public class DomainServiceImpl implements DomainService {
     private PasswordPolicyService passwordPolicyService;
 
     @Autowired
-    private IdentityProviderManager identityProviderManager;
+    private DefaultIdentityProviderService defaultIdentityProviderService;
 
     @With(AccessLevel.PACKAGE) // to make test setup less painful
     @Value("${domains.reporters.default.enabled:true}")
     private boolean createDefaultReporters = true;
+
+    @With(AccessLevel.PACKAGE) // to make test setup less painful
+    @Value("${domains.identities.default.enabled:true}")
+    private boolean createDefaultIdentityProvider = true;
 
     @Override
     public Maybe<Domain> findById(String id) {
@@ -392,10 +396,16 @@ public class DomainServiceImpl implements DomainService {
                                         .map(__ -> domain);
                             });
                 })
-                .flatMap(domain -> identityProviderManager.create(domain.getId()).map(__ -> domain))
+                //create default IdP
+                .flatMap(domain -> {
+                    if (!createDefaultIdentityProvider) {
+                        return Single.just(domain);
+                    }
+                    return defaultIdentityProviderService.create(domain.getId()).map(__ -> domain);
+                })
                 // create default reporter
                 .flatMap(domain -> {
-                        if (!createDefaultReporters) {
+                    if (!createDefaultReporters) {
                         return Single.just(domain);
                     }
                     //default behaviour
