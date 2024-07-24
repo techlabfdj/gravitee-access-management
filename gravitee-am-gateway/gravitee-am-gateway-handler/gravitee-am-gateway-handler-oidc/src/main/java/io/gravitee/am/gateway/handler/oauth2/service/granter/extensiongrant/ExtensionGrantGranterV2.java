@@ -15,6 +15,8 @@
  */
 package io.gravitee.am.gateway.handler.oauth2.service.granter.extensiongrant;
 
+import io.gravitee.am.common.jwt.Claims;
+import io.gravitee.am.common.jwt.JWT;
 import io.gravitee.am.extensiongrant.api.ExtensionGrantProvider;
 import io.gravitee.am.gateway.handler.common.auth.idp.IdentityProviderManager;
 import io.gravitee.am.gateway.handler.common.auth.user.UserAuthenticationManager;
@@ -92,7 +94,12 @@ public class ExtensionGrantGranterV2 extends ExtensionGrantGranter {
                             if (endUser.getId() != null) {
                                 // MongoIDP & JDBC IDP, set the userId as SUB claim, this claim is used as username by extensionGrantProvider.grant()
                                 // so the search by ID should be done with the username...
-                                return subjectManager.findUserBySub(endUser.getUsername())
+                                final var jwt = new JWT();
+                                jwt.setSub(endUser.getUsername());
+                                if (endUser.getAdditionalInformation().containsKey(Claims.GIO_INTERNAL_SUB)) {
+                                    jwt.setInternalSub(String.class.cast(endUser.getAdditionalInformation().get(Claims.GIO_INTERNAL_SUB)));
+                                }
+                                return subjectManager.findUserBySub(jwt)
                                         .onErrorResumeNext(e -> {
                                             if (e instanceof IllegalArgumentException) {
                                                 log.debug("Subject Manager can't retrieve the profile as sub is invalid, fall back to userService.findById", e);
