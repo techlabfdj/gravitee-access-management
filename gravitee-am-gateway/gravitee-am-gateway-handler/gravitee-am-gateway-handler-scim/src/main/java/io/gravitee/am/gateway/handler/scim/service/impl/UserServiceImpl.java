@@ -23,6 +23,7 @@ import io.gravitee.am.common.scim.filter.Filter;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.gateway.handler.common.auth.idp.IdentityProviderManager;
 import io.gravitee.am.gateway.handler.common.password.PasswordPolicyManager;
+import io.gravitee.am.gateway.handler.common.role.RoleFacade;
 import io.gravitee.am.gateway.handler.scim.exception.InvalidValueException;
 import io.gravitee.am.gateway.handler.scim.exception.SCIMException;
 import io.gravitee.am.gateway.handler.scim.exception.UniquenessException;
@@ -46,7 +47,6 @@ import io.gravitee.am.repository.management.api.search.FilterCriteria;
 import io.gravitee.am.service.AuditService;
 import io.gravitee.am.service.PasswordService;
 import io.gravitee.am.service.RateLimiterService;
-import io.gravitee.am.service.RoleService;
 import io.gravitee.am.service.UserActivityService;
 import io.gravitee.am.service.VerifyAttemptService;
 import io.gravitee.am.service.exception.AbstractManagementException;
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
     private GroupService groupService;
 
     @Autowired
-    private RoleService roleService;
+    private RoleFacade roleFacade;
 
     @Autowired
     private Domain domain;
@@ -486,7 +486,7 @@ public class UserServiceImpl implements UserService {
             return Completable.complete();
         }
 
-        return roleService.findByIdIn(roles)
+        return roleFacade.findByIdIn(roles)
                 .map(roles1 -> {
                     if (roles1.size() != roles.size()) {
                         // find difference between the two list
