@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.management.api;
+package io.gravitee.am.repository.gateway.api;
 
 import io.gravitee.am.model.RateLimit;
 import io.gravitee.am.model.ReferenceType;

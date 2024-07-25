@@ -16,6 +16,11 @@
 package io.gravitee.am.repository.jdbc.provider.impl;
 
 import io.gravitee.am.repository.Scope;
+
+import static io.gravitee.am.repository.Scope.GATEWAY;
+import static io.gravitee.am.repository.Scope.MANAGEMENT;
+import static io.gravitee.am.repository.Scope.OAUTH2;
+
 import io.gravitee.am.repository.jdbc.provider.R2DBCConnectionConfiguration;
 import io.gravitee.am.repository.jdbc.provider.R2DBCSpringBeanAccessor;
 import io.gravitee.am.repository.provider.ClientWrapper;
@@ -48,7 +53,10 @@ import org.springframework.transaction.ReactiveTransactionManager;
 public class R2DBCConnectionProvider implements ConnectionProvider<ConnectionFactory, R2DBCConnectionConfiguration>, InitializingBean, R2DBCSpringBeanAccessor {
 
     @Value("${oauth2.use-management-settings:true}")
-    private boolean useManagementSettings;
+    private boolean useOAuth2Settings;
+
+    @Value("${gateway.use-management-settings:true}")
+    private boolean useGatewaySettings;
 
     @Autowired
     private Environment environment;
@@ -56,6 +64,8 @@ public class R2DBCConnectionProvider implements ConnectionProvider<ConnectionFac
     private ClientWrapper<ConnectionFactory> commonConnectionFactory;
 
     private ClientWrapper<ConnectionFactory> oauthConnectionFactory;
+
+    private ClientWrapper<ConnectionFactory> gatewayConnectionFactory;
 
     @Autowired
     @Lazy
@@ -136,7 +146,13 @@ public class R2DBCConnectionProvider implements ConnectionProvider<ConnectionFac
 
     @Override
     public ClientWrapper getClientWrapper(String name) {
-        return Scope.OAUTH2.getName().equals(name) && !this.useManagementSettings ? this.oauthConnectionFactory : this.commonConnectionFactory;
+        if (Scope.OAUTH2.getName().equals(name) && !useOAuth2Settings) {
+            return oauthConnectionFactory;
+        } else if (Scope.GATEWAY.getName().equals(name) && !useGatewaySettings) {
+            return gatewayConnectionFactory;
+        } else {
+            return commonConnectionFactory;
+        }
     }
 
     @Override
@@ -152,15 +168,21 @@ public class R2DBCConnectionProvider implements ConnectionProvider<ConnectionFac
         if (this.oauthConnectionFactory != null) {
             ((R2DBCPoolWrapper) this.oauthConnectionFactory).shutdown();
         }
+        if (this.gatewayConnectionFactory != null) {
+            ((R2DBCPoolWrapper) this.gatewayConnectionFactory).shutdown();
+        }
         return this;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         // create the connection pool just after the bean Initialization to guaranty the uniqueness
-        this.commonConnectionFactory = new R2DBCPoolWrapper(new ConnectionFactoryProvider(this.environment, Scope.MANAGEMENT.getName()));
-        if (!useManagementSettings) {
-            this.oauthConnectionFactory = new R2DBCPoolWrapper(new ConnectionFactoryProvider(this.environment, Scope.OAUTH2.getName()));
+        this.commonConnectionFactory = new R2DBCPoolWrapper(new ConnectionFactoryProvider(this.environment, MANAGEMENT.getName()));
+        if (!useGatewaySettings) {
+            this.gatewayConnectionFactory = new R2DBCPoolWrapper(new ConnectionFactoryProvider(this.environment, GATEWAY.getName()));
+        }
+        if (!useOAuth2Settings) {
+            this.oauthConnectionFactory = new R2DBCPoolWrapper(new ConnectionFactoryProvider(this.environment, OAUTH2.getName()));
         }
     }
 
@@ -168,6 +190,4 @@ public class R2DBCConnectionProvider implements ConnectionProvider<ConnectionFac
     public boolean canHandle(String backendType) {
         return BACKEND_TYPE_RDBMS.equals(backendType);
     }
-
-
 }

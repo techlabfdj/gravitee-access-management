@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.mongodb.management;
+package io.gravitee.am.repository.mongodb.gateway;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.IndexOptions;
@@ -21,7 +21,7 @@ import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.RateLimit;
 import io.gravitee.am.model.ReferenceType;
-import io.gravitee.am.repository.management.api.RateLimitRepository;
+import io.gravitee.am.repository.gateway.api.RateLimitRepository;
 import io.gravitee.am.repository.management.api.search.RateLimitCriteria;
 import io.gravitee.am.repository.mongodb.management.internal.model.RateLimitMongo;
 import io.reactivex.rxjava3.core.Completable;
@@ -31,6 +31,7 @@ import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -45,19 +46,26 @@ import static com.mongodb.client.model.Filters.eq;
  * @author GraviteeSource Team
  */
 @Component
-public class MongoRateLimitRepository extends AbstractManagementMongoRepository implements RateLimitRepository {
+public class MongoRateLimitRepository extends AbstractGatewayMongoRepository implements RateLimitRepository {
     private static final String RATE_LIMIT = "rate_limit";
     private static final String FIELD_FACTOR_ID = "factorId";
 
     private MongoCollection<RateLimitMongo> rateLimitCollection;
+
+    @Value("${management.mongodb.ensureIndexOnStart:true}")
+    private boolean ensureIndexOnStartManagement;
+
+    @Value("${gateway.mongodb.ensureIndexOnStart:#{null}}")
+    private Boolean ensureIndexOnStart;
 
     @PostConstruct
     public void init() {
         rateLimitCollection = mongoOperations.getCollection(RATE_LIMIT, RateLimitMongo.class);
         super.init(rateLimitCollection);
         super.createIndex(rateLimitCollection, Map.of(new Document(FIELD_USER_ID, 1)
-                .append(FIELD_CLIENT, 1)
-                .append(FIELD_FACTOR_ID,1), new IndexOptions().name("u1c1f1")));
+                        .append(FIELD_CLIENT, 1)
+                        .append(FIELD_FACTOR_ID, 1), new IndexOptions().name("u1c1f1")),
+                ensureIndexOnStart != null ? ensureIndexOnStart : ensureIndexOnStartManagement);
     }
 
     @Override

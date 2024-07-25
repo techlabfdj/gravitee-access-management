@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.management.api;
+package io.gravitee.am.repository.jdbc.gateway.api;
 
 import io.gravitee.am.common.utils.RandomString;
-import io.gravitee.am.model.RateLimit;
 import io.gravitee.am.model.ReferenceType;
+import io.gravitee.am.model.VerifyAttempt;
 import io.gravitee.am.repository.jdbc.exceptions.RepositoryIllegalQueryException;
 import io.gravitee.am.repository.jdbc.management.AbstractJdbcRepository;
-import io.gravitee.am.repository.jdbc.management.api.model.JdbcRateLimit;
-import io.gravitee.am.repository.jdbc.management.api.spring.SpringRateLimitRepository;
-import io.gravitee.am.repository.management.api.RateLimitRepository;
-import io.gravitee.am.repository.management.api.search.RateLimitCriteria;
+import io.gravitee.am.repository.jdbc.management.api.model.JdbcVerifyAttempt;
+import io.gravitee.am.repository.jdbc.management.api.spring.SpringVerifyAttemptRepository;
+import io.gravitee.am.repository.gateway.api.VerifyAttemptRepository;
+import io.gravitee.am.repository.management.api.search.VerifyAttemptCriteria;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
@@ -44,63 +44,68 @@ import static reactor.adapter.rxjava.RxJava3Adapter.monoToSingle;
  * @author GraviteeSource Team
  */
 @Repository
-public class JdbcRateLimitRepository extends AbstractJdbcRepository implements RateLimitRepository {
+public class JdbcVerifyAttemptRepository extends AbstractJdbcRepository implements VerifyAttemptRepository {
 
     @Autowired
-    protected SpringRateLimitRepository rateLimitRepository;
+    SpringVerifyAttemptRepository verifyAttemptRepository;
 
-    protected RateLimit toEntity(JdbcRateLimit entity) { return mapper.map(entity, RateLimit.class);}
-    protected JdbcRateLimit toJdbcEntity(RateLimit entity) {return mapper.map(entity, JdbcRateLimit.class);}
+    protected VerifyAttempt toEntity(JdbcVerifyAttempt entity) {
+        return mapper.map(entity, VerifyAttempt.class);
+    }
+
+    protected JdbcVerifyAttempt toJdbcEntity(VerifyAttempt entity) {
+        return mapper.map(entity, JdbcVerifyAttempt.class);
+    }
 
     @Override
-    public Maybe<RateLimit> findById(String id) {
-        LOGGER.debug("RateLimit findById({})", id);
-        return rateLimitRepository.findById(id)
+    public Maybe<VerifyAttempt> findById(String id) {
+        LOGGER.debug("VerifyAttempt findById({})", id);
+        return verifyAttemptRepository.findById(id)
                 .map(this::toEntity);
     }
 
     @Override
-    public Maybe<RateLimit> findByCriteria(RateLimitCriteria criteria) {
+    public Maybe<VerifyAttempt> findByCriteria(VerifyAttemptCriteria criteria) {
         Criteria whereClause = buildWhereClause(criteria);
-        return monoToMaybe(getTemplate().select(Query.query(whereClause).with(PageRequest.of(0,1, Sort.by("id"))), JdbcRateLimit.class)
+        return monoToMaybe(getTemplate().select(Query.query(whereClause).with(PageRequest.of(0,1, Sort.by("id"))), JdbcVerifyAttempt.class)
                 .singleOrEmpty()).map(this::toEntity);
     }
 
     @Override
-    public Single<RateLimit> create(RateLimit item) {
+    public Single<VerifyAttempt> create(VerifyAttempt item) {
         item.setId(item.getId() == null ? RandomString.generate() : item.getId());
-        LOGGER.debug("create RateLimit with id {}", item.getId());
+        LOGGER.debug("create VerifyAttempt with id {}", item.getId());
         return monoToSingle(getTemplate().insert(toJdbcEntity(item))).map(this::toEntity);
     }
 
     @Override
-    public Single<RateLimit> update(RateLimit item) {
-        LOGGER.debug("update RateLimit with id '{}'", item.getId());
-        return rateLimitRepository.save(toJdbcEntity(item))
+    public Single<VerifyAttempt> update(VerifyAttempt item) {
+        LOGGER.debug("update VerifyAttempt with id '{}'", item.getId());
+        return verifyAttemptRepository.save(toJdbcEntity(item))
                 .map(this::toEntity);
     }
 
     @Override
     public Completable delete(String id) {
-        LOGGER.debug("delete RateLimit with id '{}'", id);
-        return rateLimitRepository.deleteById(id);
+        LOGGER.debug("delete VerifyAttempt with id '{}'", id);
+        return verifyAttemptRepository.deleteById(id);
     }
 
     @Override
-    public Completable delete(RateLimitCriteria criteria) {
-        LOGGER.debug("delete RateLimit with id '{}'", criteria);
+    public Completable delete(VerifyAttemptCriteria criteria) {
+        LOGGER.debug("delete VerifyAttempt with id '{}'", criteria);
         Criteria whereClause = buildWhereClause(criteria);
 
         if (!whereClause.isEmpty()) {
-            return monoToCompletable(getTemplate().delete(JdbcRateLimit.class).matching(Query.query(whereClause)).all());
+            return monoToCompletable(getTemplate().delete(JdbcVerifyAttempt.class).matching(Query.query(whereClause)).all());
         }
 
-        throw new RepositoryIllegalQueryException("Unable to delete from RateLimit with criteria");
+        throw new RepositoryIllegalQueryException("Unable to delete from VerifyAttempt with criteria");
     }
 
     @Override
     public Completable deleteByUser(String userId) {
-        LOGGER.debug("delete RateLimit with user id '{}'", userId);
+        LOGGER.debug("delete VerifyAttempt with user id '{}'", userId);
 
         Criteria whereClause = Criteria.empty();
         if(userId != null && !userId.isEmpty()){
@@ -108,15 +113,15 @@ public class JdbcRateLimitRepository extends AbstractJdbcRepository implements R
         }
 
         if (!whereClause.isEmpty()) {
-            return monoToCompletable(getTemplate().delete(JdbcRateLimit.class).matching(Query.query(whereClause)).all());
+            return monoToCompletable(getTemplate().delete(JdbcVerifyAttempt.class).matching(Query.query(whereClause)).all());
         }
 
-        throw new RepositoryIllegalQueryException("Unable to delete from RateLimit with userId");
+        throw new RepositoryIllegalQueryException("Unable to delete from VerifyAttempt with userId");
     }
 
     @Override
     public Completable deleteByDomain(String domainId, ReferenceType referenceType) {
-        LOGGER.debug("delete RateLimit with domain id '{}' and reference type {}", domainId, referenceType);
+        LOGGER.debug("delete VerifyAttempt with domain id '{}' and reference type {}", domainId, referenceType);
 
         Criteria whereClause = Criteria.empty();
         if(domainId != null && !domainId.isEmpty()){
@@ -124,13 +129,13 @@ public class JdbcRateLimitRepository extends AbstractJdbcRepository implements R
         }
 
         if (!whereClause.isEmpty()) {
-            return monoToCompletable(getTemplate().delete(JdbcRateLimit.class).matching(Query.query(whereClause)).all());
+            return monoToCompletable(getTemplate().delete(JdbcVerifyAttempt.class).matching(Query.query(whereClause)).all());
         }
 
-        throw new RepositoryIllegalQueryException("Unable to delete from RateLimit with domainId");
+        throw new RepositoryIllegalQueryException("Unable to delete from VerifyAttempt with domainId");
     }
 
-    protected Criteria buildWhereClause(RateLimitCriteria criteria){
+    protected Criteria buildWhereClause(VerifyAttemptCriteria criteria){
         Criteria whereClause = Criteria.empty();
 
         if(criteria.userId() != null && !criteria.userId().isEmpty()){

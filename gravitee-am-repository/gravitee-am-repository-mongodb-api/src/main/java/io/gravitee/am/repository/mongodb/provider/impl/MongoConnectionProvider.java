@@ -36,7 +36,10 @@ import org.springframework.stereotype.Component;
 public class MongoConnectionProvider implements ConnectionProvider<MongoClient, MongoConnectionConfiguration>, InitializingBean {
 
     @Value("${oauth2.use-management-settings:true}")
-    private boolean useManagementSettings;
+    private boolean useOAuth2Settings;
+
+    @Value("${gateway.use-management-settings:true}")
+    private boolean useGatewaySettings;
 
     @Autowired
     private Environment environment;
@@ -45,12 +48,18 @@ public class MongoConnectionProvider implements ConnectionProvider<MongoClient, 
 
     private ClientWrapper<MongoClient> oauthMongoClient;
 
+    private ClientWrapper<MongoClient> gatewayMongoClient;
+
+
     @Override
     public void afterPropertiesSet() throws Exception {
         // create the common client just after the bean Initialization to guaranty the uniqueness
         this.commonMongoClient = new MongoClientWrapper(new MongoFactory(this.environment, Scope.MANAGEMENT.getName()).getObject());
-        if (!useManagementSettings) {
+        if (!useOAuth2Settings) {
             this.oauthMongoClient = new MongoClientWrapper(new MongoFactory(this.environment, Scope.OAUTH2.getName()).getObject());
+        }
+        if (!useGatewaySettings) {
+            this.gatewayMongoClient = new MongoClientWrapper(new MongoFactory(this.environment, Scope.GATEWAY.getName()).getObject());
         }
     }
 
@@ -61,7 +70,13 @@ public class MongoConnectionProvider implements ConnectionProvider<MongoClient, 
 
     @Override
     public ClientWrapper getClientWrapper(String name) {
-        return Scope.OAUTH2.getName().equals(name) && !this.useManagementSettings ? this.oauthMongoClient : this.commonMongoClient;
+       if (Scope.OAUTH2.getName().equals(name) && !useOAuth2Settings) {
+           return oauthMongoClient;
+       } else if (Scope.GATEWAY.getName().equals(name) && !useGatewaySettings) {
+           return gatewayMongoClient;
+       } else {
+           return commonMongoClient;
+       }
     }
 
     @Override
@@ -76,6 +91,9 @@ public class MongoConnectionProvider implements ConnectionProvider<MongoClient, 
         }
         if (this.oauthMongoClient != null) {
             ((MongoClientWrapper)this.oauthMongoClient).shutdown();
+        }
+        if (this.gatewayMongoClient != null) {
+            ((MongoClientWrapper)this.gatewayMongoClient).shutdown();
         }
         return this;
     }

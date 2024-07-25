@@ -75,9 +75,10 @@ public class OAuth2Configuration implements ProtocolConfiguration {
 
     @Bean
     public UserConsentService userConsentService(
-            @Value("${oauth2.approval.expiry:-1}") int approvalExpirySeconds
+            @Value("${oauth2.approval.expiry:-1}") int approvalExpirySeconds,
+            @Value("${gateway.approval.expiry:#{null}}") Integer approvalExpirySecondsGateway
     ) {
-        return new UserConsentServiceImpl(approvalExpirySeconds);
+        return new UserConsentServiceImpl(approvalExpirySecondsGateway != null ? approvalExpirySecondsGateway : approvalExpirySeconds);
     }
 
     @Bean

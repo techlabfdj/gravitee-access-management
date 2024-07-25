@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.oauth2.api;
+package io.gravitee.am.repository.jdbc.gateway.api;
 
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.oauth2.ScopeApproval;
 import io.gravitee.am.repository.jdbc.management.AbstractJdbcRepository;
 import io.gravitee.am.repository.jdbc.oauth2.api.model.JdbcScopeApproval;
 import io.gravitee.am.repository.jdbc.oauth2.api.spring.SpringScopeApprovalRepository;
-import io.gravitee.am.repository.oauth2.api.ScopeApprovalRepository;
+import io.gravitee.am.repository.gateway.api.ScopeApprovalRepository;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;

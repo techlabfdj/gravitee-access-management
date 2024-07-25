@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.mongodb.management;
+package io.gravitee.am.repository.mongodb.gateway;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.IndexOptions;
@@ -21,7 +21,7 @@ import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.ReferenceType;
 import io.gravitee.am.model.VerifyAttempt;
-import io.gravitee.am.repository.management.api.VerifyAttemptRepository;
+import io.gravitee.am.repository.gateway.api.VerifyAttemptRepository;
 import io.gravitee.am.repository.management.api.search.VerifyAttemptCriteria;
 import io.gravitee.am.repository.mongodb.management.internal.model.VerifyAttemptMongo;
 import io.reactivex.rxjava3.core.Completable;
@@ -31,6 +31,7 @@ import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -45,18 +46,25 @@ import static com.mongodb.client.model.Filters.eq;
  * @author GraviteeSource Team
  */
 @Component
-public class MongoVerifyAttemptRepository extends AbstractManagementMongoRepository implements VerifyAttemptRepository {
-    private static final String VERIFY_ATTEMPT="verify_attempt";
+public class MongoVerifyAttemptRepository extends AbstractGatewayMongoRepository implements VerifyAttemptRepository {
+    private static final String VERIFY_ATTEMPT = "verify_attempt";
     private static final String FIELD_FACTOR_ID = "factorId";
 
     private MongoCollection<VerifyAttemptMongo> verifyAttemptCollection;
 
+    @Value("${management.mongodb.ensureIndexOnStart:true}")
+    private Boolean ensureIndexOnStartManagement;
+
+    @Value("${gateway.mongodb.ensureIndexOnStart:#{null}}")
+    private Boolean ensureIndexOnStart;
+
     @PostConstruct
-    public void init(){
+    public void init() {
         verifyAttemptCollection = mongoOperations.getCollection(VERIFY_ATTEMPT, VerifyAttemptMongo.class);
         super.init(verifyAttemptCollection);
-        super.createIndex(verifyAttemptCollection, Map.of(new Document(FIELD_USER_ID, 1).append(FIELD_CLIENT, 1).append(FIELD_FACTOR_ID,1),
-                new IndexOptions().name("u1c1f1")));
+        super.createIndex(verifyAttemptCollection, Map.of(new Document(FIELD_USER_ID, 1).append(FIELD_CLIENT, 1).append(FIELD_FACTOR_ID, 1),
+                        new IndexOptions().name("u1c1f1")),
+                ensureIndexOnStart != null ? ensureIndexOnStart : ensureIndexOnStartManagement);
     }
 
     @Override

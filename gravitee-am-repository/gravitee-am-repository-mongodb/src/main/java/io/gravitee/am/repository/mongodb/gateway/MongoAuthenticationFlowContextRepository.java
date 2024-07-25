@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.mongodb.management;
+package io.gravitee.am.repository.mongodb.gateway;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.model.AuthenticationFlowContext;
-import io.gravitee.am.repository.management.api.AuthenticationFlowContextRepository;
+import io.gravitee.am.repository.gateway.api.AuthenticationFlowContextRepository;
 import io.gravitee.am.repository.mongodb.management.internal.model.AuthenticationFlowContextMongo;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
@@ -28,6 +28,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -43,13 +44,19 @@ import static com.mongodb.client.model.Filters.gt;
  * @author GraviteeSource Team
  */
 @Component
-public class MongoAuthenticationFlowContextRepository extends AbstractManagementMongoRepository implements AuthenticationFlowContextRepository {
+public class MongoAuthenticationFlowContextRepository extends AbstractGatewayMongoRepository implements AuthenticationFlowContextRepository {
 
     private static final String FIELD_TRANSACTION_ID = "transactionId";
     private static final String FIELD_VERSION = "version";
     private static final String FIELD_EXPIRES_AT = "expire_at";
 
     private MongoCollection<AuthenticationFlowContextMongo> authContextCollection;
+
+    @Value("${management.mongodb.ensureIndexOnStart:true}")
+    private boolean ensureIndexOnStartManagement;
+
+    @Value("${gateway.mongodb.ensureIndexOnStart:#{null}}")
+    private Boolean ensureIndexOnStart;
 
     @PostConstruct
     public void init() {
@@ -58,9 +65,9 @@ public class MongoAuthenticationFlowContextRepository extends AbstractManagement
 
         final var indexes = new HashMap<Document, IndexOptions>();
         indexes.put(new Document(FIELD_TRANSACTION_ID, 1).append(FIELD_VERSION, -1), new IndexOptions().name("t1v_1"));
-        indexes.put(new Document(FIELD_EXPIRES_AT, 1), new IndexOptions().name("e1").expireAfter(0l, TimeUnit.SECONDS));
+        indexes.put(new Document(FIELD_EXPIRES_AT, 1), new IndexOptions().name("e1").expireAfter(0L, TimeUnit.SECONDS));
 
-        super.createIndex(authContextCollection, indexes);
+        super.createIndex(authContextCollection, indexes, ensureIndexOnStart != null ? ensureIndexOnStart : ensureIndexOnStartManagement);
     }
 
     @Override

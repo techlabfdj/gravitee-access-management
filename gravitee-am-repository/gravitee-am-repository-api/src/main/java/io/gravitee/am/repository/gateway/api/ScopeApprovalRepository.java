@@ -13,25 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.management.api;
+package io.gravitee.am.repository.gateway.api;
 
-import io.gravitee.am.model.LoginAttempt;
+import io.gravitee.am.model.oauth2.ScopeApproval;
 import io.gravitee.am.repository.common.CrudRepository;
-import io.gravitee.am.repository.management.api.search.LoginAttemptCriteria;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 /**
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
  * @author GraviteeSource Team
  */
-public interface LoginAttemptRepository extends CrudRepository<LoginAttempt, String> {
+public interface ScopeApprovalRepository extends CrudRepository<ScopeApproval, String> {
 
-    Maybe<LoginAttempt> findByCriteria(LoginAttemptCriteria criteria);
+    Flowable<ScopeApproval> findByDomainAndUserAndClient(String domain, String userId, String clientId);
 
-    Completable delete(LoginAttemptCriteria criteria);
+    Flowable<ScopeApproval> findByDomainAndUser(String domain, String user);
+
+    Single<ScopeApproval> upsert(ScopeApproval scopeApproval);
+
+    Completable deleteByDomainAndScopeKey(String domain, String scope);
+
+    Completable deleteByDomainAndUserAndClient(String domain, String user, String client);
+
+    Completable deleteByDomainAndUser(String domain, String user);
 
     default Completable purgeExpiredData() {
         return Completable.complete();
     }
+
 }

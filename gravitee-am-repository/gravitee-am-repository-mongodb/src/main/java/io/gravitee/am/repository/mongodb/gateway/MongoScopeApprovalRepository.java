@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.mongodb.oauth2;
+package io.gravitee.am.repository.mongodb.gateway;
 
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.oauth2.ScopeApproval;
+import io.gravitee.am.repository.gateway.api.ScopeApprovalRepository;
 import io.gravitee.am.repository.mongodb.oauth2.internal.model.ScopeApprovalMongo;
-import io.gravitee.am.repository.oauth2.api.ScopeApprovalRepository;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -28,6 +28,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -45,7 +46,7 @@ import static com.mongodb.client.model.Filters.gte;
  * @author GraviteeSource Team
  */
 @Component
-public class MongoScopeApprovalRepository extends AbstractOAuth2MongoRepository implements ScopeApprovalRepository {
+public class MongoScopeApprovalRepository extends AbstractGatewayMongoRepository implements ScopeApprovalRepository {
 
     private static final String FIELD_TRANSACTION_ID = "transactionId";
     private static final String FIELD_USER_ID = "userId";
@@ -53,6 +54,12 @@ public class MongoScopeApprovalRepository extends AbstractOAuth2MongoRepository 
     private static final String FIELD_EXPIRES_AT = "expiresAt";
     private static final String FIELD_SCOPE = "scope";
     private MongoCollection<ScopeApprovalMongo> scopeApprovalsCollection;
+
+    @Value("${oauth2.mongodb.ensureIndexOnStart:true}")
+    private boolean ensureIndexOnStartOAuth2;
+
+    @Value("${gateway.mongodb.ensureIndexOnStart:#{null}}")
+    private Boolean ensureIndexOnStart;
 
     @PostConstruct
     public void init() {
@@ -65,9 +72,9 @@ public class MongoScopeApprovalRepository extends AbstractOAuth2MongoRepository 
         indexes.put(new Document(FIELD_DOMAIN, 1).append(FIELD_CLIENT_ID, 1).append(FIELD_USER_ID, 1), new IndexOptions().name("d1c1u1"));
         indexes.put(new Document(FIELD_DOMAIN, 1).append(FIELD_CLIENT_ID, 1).append(FIELD_USER_ID, 1).append(FIELD_SCOPE, 1), new IndexOptions().name("d1c1u1s1"));
         // expire after index
-        indexes.put(new Document(FIELD_EXPIRES_AT, 1),  new IndexOptions().name("e1").expireAfter(0l, TimeUnit.SECONDS));
+        indexes.put(new Document(FIELD_EXPIRES_AT, 1), new IndexOptions().name("e1").expireAfter(0L, TimeUnit.SECONDS));
 
-        super.createIndex(scopeApprovalsCollection, indexes);
+        super.createIndex(scopeApprovalsCollection, indexes, ensureIndexOnStart != null ? ensureIndexOnStart : ensureIndexOnStartOAuth2);
     }
 
     @Override
@@ -107,10 +114,10 @@ public class MongoScopeApprovalRepository extends AbstractOAuth2MongoRepository 
     @Override
     public Single<ScopeApproval> upsert(ScopeApproval scopeApproval) {
         return Observable.fromPublisher(scopeApprovalsCollection.find(
-                and(eq(FIELD_DOMAIN, scopeApproval.getDomain()),
-                        eq(FIELD_CLIENT_ID, scopeApproval.getClientId()),
-                        eq(FIELD_USER_ID, scopeApproval.getUserId()),
-                        eq(FIELD_SCOPE, scopeApproval.getScope()))).first())
+                        and(eq(FIELD_DOMAIN, scopeApproval.getDomain()),
+                                eq(FIELD_CLIENT_ID, scopeApproval.getClientId()),
+                                eq(FIELD_USER_ID, scopeApproval.getUserId()),
+                                eq(FIELD_SCOPE, scopeApproval.getScope()))).first())
                 .firstElement()
                 .map(Optional::of)
                 .defaultIfEmpty(Optional.empty())

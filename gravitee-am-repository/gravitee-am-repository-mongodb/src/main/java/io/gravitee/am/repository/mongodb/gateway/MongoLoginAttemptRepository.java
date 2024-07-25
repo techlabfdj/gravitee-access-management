@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.mongodb.management;
+package io.gravitee.am.repository.mongodb.gateway;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.LoginAttempt;
-import io.gravitee.am.repository.management.api.LoginAttemptRepository;
+import io.gravitee.am.repository.gateway.api.LoginAttemptRepository;
 import io.gravitee.am.repository.management.api.search.LoginAttemptCriteria;
 import io.gravitee.am.repository.mongodb.management.internal.model.LoginAttemptMongo;
 import io.reactivex.rxjava3.core.Completable;
@@ -30,6 +30,7 @@ import io.reactivex.rxjava3.core.Single;
 import jakarta.annotation.PostConstruct;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,12 +48,18 @@ import static com.mongodb.client.model.Filters.gte;
  * @author GraviteeSource Team
  */
 @Component
-public class MongoLoginAttemptRepository extends AbstractManagementMongoRepository implements LoginAttemptRepository {
+public class MongoLoginAttemptRepository extends AbstractGatewayMongoRepository implements LoginAttemptRepository {
 
     private static final String FIELD_IDP = "identityProvider";
     private static final String FIELD_USERNAME = "username";
     private static final String FIELD_EXPIRE_AT = "expireAt";
     private MongoCollection<LoginAttemptMongo> loginAttemptsCollection;
+
+    @Value("${management.mongodb.ensureIndexOnStart:true}")
+    private boolean ensureIndexOnStartManagement;
+
+    @Value("${gateway.mongodb.ensureIndexOnStart:#{null}}")
+    private Boolean ensureIndexOnStart;
 
     @PostConstruct
     public void init() {
@@ -64,7 +71,7 @@ public class MongoLoginAttemptRepository extends AbstractManagementMongoReposito
         // expire after index
         indexes.put(new Document(FIELD_EXPIRE_AT, 1), new IndexOptions().name("e1").expireAfter(0L, TimeUnit.SECONDS));
 
-        super.createIndex(loginAttemptsCollection, indexes);
+        super.createIndex(loginAttemptsCollection, indexes, ensureIndexOnStart != null ? ensureIndexOnStart : ensureIndexOnStartManagement);
     }
 
     @Override
@@ -81,7 +88,10 @@ public class MongoLoginAttemptRepository extends AbstractManagementMongoReposito
     public Single<LoginAttempt> create(LoginAttempt item) {
         LoginAttemptMongo loginAttempt = convert(item);
         loginAttempt.setId(loginAttempt.getId() == null ? RandomString.generate() : loginAttempt.getId());
-        return Single.fromPublisher(loginAttemptsCollection.insertOne(loginAttempt)).flatMap(success -> { item.setId(loginAttempt.getId()); return Single.just(item); });
+        return Single.fromPublisher(loginAttemptsCollection.insertOne(loginAttempt)).flatMap(success -> {
+            item.setId(loginAttempt.getId());
+            return Single.just(item);
+        });
     }
 
     @Override

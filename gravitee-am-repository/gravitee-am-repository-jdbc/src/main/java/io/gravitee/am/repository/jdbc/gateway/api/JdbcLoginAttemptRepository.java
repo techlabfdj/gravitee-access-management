@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.management.api;
+package io.gravitee.am.repository.jdbc.gateway.api;
 
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.model.LoginAttempt;
@@ -21,7 +21,7 @@ import io.gravitee.am.repository.jdbc.exceptions.RepositoryIllegalQueryException
 import io.gravitee.am.repository.jdbc.management.AbstractJdbcRepository;
 import io.gravitee.am.repository.jdbc.management.api.model.JdbcLoginAttempt;
 import io.gravitee.am.repository.jdbc.management.api.spring.SpringLoginAttemptRepository;
-import io.gravitee.am.repository.management.api.LoginAttemptRepository;
+import io.gravitee.am.repository.gateway.api.LoginAttemptRepository;
 import io.gravitee.am.repository.management.api.search.LoginAttemptCriteria;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;

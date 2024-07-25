@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.management.api;
+package io.gravitee.am.repository.gateway.api;
 
 import io.gravitee.am.model.AuthenticationFlowContext;
-import io.gravitee.am.repository.management.AbstractManagementTest;
+import io.gravitee.am.repository.gateway.AbstractGatewayTest;
 import io.reactivex.rxjava3.observers.TestObserver;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import org.junit.Before;
@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Eric LELEU (eric.leleu at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class AuthenticationFlowContextRepositoryTest extends AbstractManagementTest {
+public class AuthenticationFlowContextRepositoryTest extends AbstractGatewayTest {
     private String TRANSACTION_ID = null;
 
     @Autowired

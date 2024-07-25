@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.management.api;
+package io.gravitee.am.repository.gateway.api;
 
 import io.gravitee.am.model.LoginAttempt;
-import io.gravitee.am.repository.management.AbstractManagementTest;
+import io.gravitee.am.repository.gateway.AbstractGatewayTest;
 import io.gravitee.am.repository.management.api.search.LoginAttemptCriteria;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @author Eric LELEU (eric.leleu at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class LoginAttemptRepositoryTest extends AbstractManagementTest {
+public class LoginAttemptRepositoryTest extends AbstractGatewayTest {
     @Autowired
     protected LoginAttemptRepository repository;
 

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.management.api;
+package io.gravitee.am.repository.gateway.api;
 
 import io.gravitee.am.model.ReferenceType;
 import io.gravitee.am.model.VerifyAttempt;
-import io.gravitee.am.repository.management.AbstractManagementTest;
+import io.gravitee.am.repository.gateway.AbstractGatewayTest;
 import io.gravitee.am.repository.management.api.search.VerifyAttemptCriteria;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ashraful Hasan (ashraful.hasan at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class VerifyAttemptRepositoryTest extends AbstractManagementTest {
+public class VerifyAttemptRepositoryTest extends AbstractGatewayTest {
 
     @Autowired
     protected VerifyAttemptRepository repository;
@@ -262,7 +262,7 @@ public class VerifyAttemptRepositoryTest extends AbstractManagementTest {
         verifyAttempt.setUpdatedAt(date);
         verifyAttempt.setReferenceId("domain-id" + random);
         verifyAttempt.setReferenceType(ReferenceType.DOMAIN);
-        
+
         return verifyAttempt;
     }
 }

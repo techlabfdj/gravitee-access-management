@@ -16,7 +16,7 @@
 package io.gravitee.am.repository.oauth2.api;
 
 import io.gravitee.am.model.oauth2.ScopeApproval;
-import io.gravitee.am.repository.jdbc.oauth2.api.JdbcScopeApprovalRepository;
+import io.gravitee.am.repository.jdbc.gateway.api.JdbcScopeApprovalRepository;
 import io.gravitee.am.repository.oauth2.AbstractOAuthTest;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Test;

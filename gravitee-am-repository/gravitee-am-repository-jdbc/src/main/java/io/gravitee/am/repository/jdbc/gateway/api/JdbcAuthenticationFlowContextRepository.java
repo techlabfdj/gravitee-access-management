@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.management.api;
+package io.gravitee.am.repository.jdbc.gateway.api;
 
 import io.gravitee.am.model.AuthenticationFlowContext;
 import io.gravitee.am.repository.jdbc.management.AbstractJdbcRepository;
 import io.gravitee.am.repository.jdbc.management.api.model.JdbcAuthenticationFlowContext;
-import io.gravitee.am.repository.management.api.AuthenticationFlowContextRepository;
+import io.gravitee.am.repository.gateway.api.AuthenticationFlowContextRepository;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;

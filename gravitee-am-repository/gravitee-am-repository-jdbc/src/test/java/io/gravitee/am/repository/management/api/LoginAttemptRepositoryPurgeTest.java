@@ -16,7 +16,7 @@
 package io.gravitee.am.repository.management.api;
 
 import io.gravitee.am.model.LoginAttempt;
-import io.gravitee.am.repository.jdbc.management.api.JdbcLoginAttemptRepository;
+import io.gravitee.am.repository.jdbc.gateway.api.JdbcLoginAttemptRepository;
 import io.gravitee.am.repository.management.AbstractManagementTest;
 import io.reactivex.rxjava3.observers.TestObserver;
 import org.junit.Test;

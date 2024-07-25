@@ -13,25 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository;
+package io.gravitee.am.repository.gateway.test.config;
 
-/**
- * @author David BRASSELY (david.brassely at graviteesource.com)
- * @author GraviteeSource Team
- */
-public enum Scope {
+import org.springframework.context.annotation.Configuration;
 
-    OAUTH2("oauth2"),
-    MANAGEMENT("management"),
-    GATEWAY("gateway");
-
-    private final String name;
-
-    Scope(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
+@Configuration
+public class GatewayTestConfigurationLoader {
+    // empty class that will be excluded from the test-jar.
+    // must be created in each repository module to provide relevant spring configuration
 }
