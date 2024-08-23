@@ -30,7 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.UUID;
+
+import static io.gravitee.am.common.jwt.Claims.GIO_INTERNAL_SUB;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
@@ -55,7 +58,9 @@ public class SubjectManagerV2 implements SubjectManager {
 
     @Override
     public String generateInternalSubFrom(User user) {
-        return user.getSource() + SEPARATOR + user.getExternalId();
+        return Optional.ofNullable(user.getAdditionalInformation())
+                .map(map -> (String) map.get(GIO_INTERNAL_SUB))
+                .orElseGet(() -> user.getSource() + SEPARATOR + user.getExternalId());
     }
 
     @Override

@@ -36,9 +36,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static io.gravitee.am.common.jwt.Claims.GIO_INTERNAL_SUB;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -146,4 +148,18 @@ public class SubjectManagerV2Test {
 
         Assertions.assertNull(token.getInternalSub());
     }
+
+    @Test
+    public void should_set_internal_subject_as_gis_if_its_present_in_additional_information(){
+        final User user = new User();
+        user.setId("client-id");
+        user.setAdditionalInformation(Map.of(GIO_INTERNAL_SUB, "idp:sub"));
+        final var token = new JWT();
+
+        cut.updateJWT(token, user);
+
+        Assertions.assertEquals("idp:sub", token.getInternalSub());
+    }
+
+
 }
