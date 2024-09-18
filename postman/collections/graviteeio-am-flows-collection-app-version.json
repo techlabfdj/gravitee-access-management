@@ -416,7 +416,9 @@
 									"    var location = postman.getResponseHeader('Location');",
 									"    let domain = pm.environment.get(\"domainHrid\");",
 									"    ",
-									"    tests['Redirect to login page with client_id'] = location.includes(pm.environment.get('gateway_url') + '/' + domain + '/login') && location.includes('client_id=' + pm.environment.get('clientId'));",
+                                    "    pm.test(\"Redirect to login page with client_id\", function () {",
+                                    "        location.includes(pm.environment.get('gateway_url') + '/' + domain + '/login') && location.includes('client_id=' + pm.environment.get('clientId'));",
+                                    "    })  ;",
 									"    ",
 									"    pm.environment.set('redirection', postman.getResponseHeader(\"Location\"));",
 									"});"
@@ -540,7 +542,8 @@
 									"    var location = postman.getResponseHeader(\"Location\");",
 									"    console.log(\"location : \" + location);",
 									"    pm.environment.set('redirection', location);",
-									"    tests['Redirect to Authorization Endpoint'] = location.includes('/oauth/authorize');",
+                                    "    ",
+                                    "    pm.expect(location.includes('/oauth/authorize--------dsds')).to.be.true;\",",
 									"});"
 								],
 								"type": "text/javascript"
@@ -616,7 +619,7 @@
 									"",
 									"    var location = postman.getResponseHeader(\"Location\");",
 									"    pm.environment.set('redirection', location);",
-									"    tests['Redirect to User Consent'] = location.includes('/oauth/consent');",
+                                    "    pm.expect(location.includes('/oauth/consent')).to.be.true;\",",
 									"});"
 								],
 								"type": "text/javascript"
@@ -663,8 +666,10 @@
 									"    var location = postman.getResponseHeader(\"Location\");",
 									"    pm.environment.set('redirection', location);",
 									"",
-									"    tests['Redirect to login'] = location.includes('/login?response_type=code&client_id='+ pm.environment.get('clientId') + '&redirect_uri=https%3A%2F%2Fauth-nightly.gravitee.io%2FmyApp%2Fcallback&state=1234-5678-9876&scope=openid&error=user_consent_failed&error_code=CALLOUT_EXIT_ON_ERROR&error_description=pre-consent-failed');",
-									"});"
+                                    "    pm.test('Redirect to login', function () {",
+                                    "        pm.expect(location).to.include('/login?response_type=code&client_id=' + pm.environment.get('clientId') + '&redirect_uri=https%3A%2F%2Fauth-nightly.gravitee.io%2FmyApp%2Fcallback&state=1234-5678-9876&scope=openid&error=user_consent_failed&error_code=CALLOUT_EXIT_ON_ERROR&error_description=pre-consent-failed');",
+                                    "    });",
+                                    "});"
 								],
 								"type": "text/javascript"
 							}
@@ -817,7 +822,10 @@
 									"    var location = postman.getResponseHeader('Location');",
 									"    let domain = pm.environment.get(\"domainHrid\");",
 									"    ",
-									"    tests['Redirect to login page with client_id'] = location.includes(pm.environment.get('gateway_url') + '/' + domain + '/login') && location.includes('client_id=' + pm.environment.get('clientId'));",
+                                    "    pm.test('Redirect to login page with client_id', function () {",
+                                    "        pm.expect(location).to.include(pm.environment.get('gateway_url') + '/' + domain + '/login');",
+                                    "        pm.expect(location).to.include('client_id=' + pm.environment.get('clientId'));",
+                                    "    });",
 									"    ",
 									"    pm.environment.set('redirection', postman.getResponseHeader(\"Location\"));",
 									"});"
@@ -940,7 +948,9 @@
 									"",
 									"    var location = postman.getResponseHeader(\"Location\");",
 									"    pm.environment.set('redirection', location);",
-									"    tests['Redirect to authorize page'] = location.includes('/oauth/authorize');",
+                                    "    pm.test('Redirect to authorize page', function () {",
+                                    "        pm.expect(location).to.include('/oauth/authorize');",
+                                    "    });",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1016,7 +1026,9 @@
 									"",
 									"    var location = postman.getResponseHeader(\"Location\");",
 									"    pm.environment.set('redirection', location);",
-									"    tests['Redirect to Authorization Endpoint'] = location.includes('/oauth/consent');",
+                                    "    pm.test('Redirect to consent page', function () {",
+                                    "        pm.expect(location).to.include('/oauth/consent');",
+                                    "    });",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1178,7 +1190,10 @@
 									"    var location = postman.getResponseHeader('Location');",
 									"    let domain = pm.environment.get(\"domainHrid\");",
 									"    ",
-									"    tests['Redirect to login page with client_id'] = location.includes(pm.environment.get('gateway_url') + '/' + domain + '/login') && location.includes('client_id=' + pm.environment.get('clientId'));",
+                                    "    pm.test('Redirect to login page with client_id', function () {",
+                                    "        pm.expect(location).to.include(pm.environment.get('gateway_url') + '/' + domain + '/login');",
+                                    "        pm.expect(location).to.include('client_id=' + pm.environment.get('clientId'));",
+                                    "    });",
 									"    ",
 									"    pm.environment.set('redirection', postman.getResponseHeader(\"Location\"));",
 									"});"
@@ -1247,9 +1262,9 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Response Time is less than 3 seconds\", function () {",
-									"     tests['Response Time is less than 3 seconds'] = pm.response.responseTime < 3000;",
-									"});",
+                                    "pm.test(\"Response Time is less than 3 seconds\", function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                                    "});",
 									"",
 									"pm.test(\"Should be ok\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1360,7 +1375,13 @@
 									"    var location = postman.getResponseHeader('Location');",
 									"    let domain = pm.environment.get(\"domainHrid\");",
 									"    ",
-									"    tests['Redirect to login page with client_id'] = location.includes(pm.environment.get('gateway_url') + '/' + domain + '/login') && location.includes('client_id=' + pm.environment.get('clientId'));",
+                                    "    pm.test('Redirect to correct login page', function() {",
+                                    "        pm.expect(location).to.include(pm.environment.get('gateway_url') + '/' + domain + '/login');",
+                                    "    });",
+                                    "",
+                                    "    pm.test('Contains client_id', function() {",
+                                    "        pm.expect(location).to.include('client_id=' + pm.environment.get('clientId'));",
+                                    "    });",
 									"    ",
 									"    pm.environment.set('redirection', postman.getResponseHeader(\"Location\"));",
 									"});"
@@ -1430,7 +1451,7 @@
 									"});",
 									"",
 									"pm.test(\"Response Time is greater than than 3 seconds\", function () {",
-									"     tests['Response Time is greater than than 3 seconds'] = pm.response.responseTime > 3000;",
+									"     pm.expect(pm.response.responseTime).to.be.above(3000);",
 									"});",
 									"",
 									"pm.test(\"Should be ok\", function () {",
