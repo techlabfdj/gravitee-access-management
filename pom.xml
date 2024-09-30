@@ -73,9 +73,15 @@
 
     <properties>
         <awaitility.version>4.2.0</awaitility.version>
+<<<<<<< HEAD
         <gravitee-bom.version>8.0.4</gravitee-bom.version>
         <gravitee-common.version>4.2.0</gravitee-common.version>
         <gravitee-plugin.version>4.0.3</gravitee-plugin.version>
+=======
+        <gravitee-bom.version>8.1.16</gravitee-bom.version>
+        <gravitee-common.version>3.4.0</gravitee-common.version>
+        <gravitee-plugin.version>3.1.0</gravitee-plugin.version>
+>>>>>>> c19d16645c (chore: upgrade gravitee-bom from 8.0.4 to 8.1.16)
         <gravitee-node.version>5.18.2</gravitee-node.version>
         <gravitee-reporter.version>1.17.1</gravitee-reporter.version>
         <gravitee-gateway-api.version>3.5.0</gravitee-gateway-api.version>
