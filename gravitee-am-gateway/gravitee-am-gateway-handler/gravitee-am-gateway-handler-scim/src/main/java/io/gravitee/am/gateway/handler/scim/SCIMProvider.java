@@ -119,7 +119,7 @@ public class SCIMProvider extends AbstractProtocolProvider {
             scimRouter.patch("/Groups/:id").handler(groupEndpoint::patch);
             scimRouter.delete("/Groups/:id").handler(groupEndpoint::delete);
 
-            BulkEndpoint bulkEndpoint = new BulkEndpoint();
+            BulkEndpoint bulkEndpoint = new BulkEndpoint(userService, objectMapper, domain, subjectManager);
             scimRouter.post("/Bulk").handler(bulkEndpoint::execute);
 
             // error handler

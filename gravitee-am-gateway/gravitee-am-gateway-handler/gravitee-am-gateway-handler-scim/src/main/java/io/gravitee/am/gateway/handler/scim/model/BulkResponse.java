@@ -32,4 +32,9 @@ public class BulkResponse {
     private static final List<String> SCHEMAS = Arrays.asList("urn:ietf:params:scim:api:messages:2.0:BulkResponse");
     @JsonProperty("Operations")
     private List<BulkOperation> operations;
+
+    @JsonProperty("schemas")
+    public final List<String> getSchemas() {
+        return SCHEMAS;
+    }
 }

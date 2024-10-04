@@ -18,20 +18,23 @@ package io.gravitee.am.gateway.handler.scim.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
  * @author GraviteeSource Team
  */
-@Data
+@Getter
+@Setter
 public class BulkRequest {
+    public static final String BULK_REQUEST_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
 
-    private static final List<String> SCHEMAS = Arrays.asList("urn:ietf:params:scim:api:messages:2.0:BulkRequest");
+    private List<String> schemas;
     private Integer failOnErrors;
     @JsonProperty("Operations")
     private List<BulkOperation> operations;
+
 }

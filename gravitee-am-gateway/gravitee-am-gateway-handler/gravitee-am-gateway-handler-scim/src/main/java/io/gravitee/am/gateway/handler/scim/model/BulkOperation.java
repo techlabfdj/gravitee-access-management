@@ -17,8 +17,9 @@
 package io.gravitee.am.gateway.handler.scim.model;
 
 
-import io.vertx.core.json.JsonObject;
 import lombok.Data;
+
+import java.util.Map;
 
 /**
  * Defines operations within a bulk job.  Each operation corresponds
@@ -66,7 +67,7 @@ public class BulkOperation {
      *          PUT, or PATCH operation.  REQUIRED in a request when "method"
      *          is "POST", "PUT", or "PATCH".
      */
-    private JsonObject data;
+    private Map<String, Object> data;
     /**
      * The resource endpoint URL.  REQUIRED in a response,
      *          except in the event of a POST failure.
@@ -79,11 +80,23 @@ public class BulkOperation {
      *          included.  For normal completion, the server MAY elect to omit
      *          the response body.
      */
-    private JsonObject response;
+    private Object response;
     /**
      * The HTTP response status code for the requested operation.
      *          When indicating an error, the "response" attribute MUST contain
      *          the detail error response as per Section 3.12.
      */
-    private Integer status;
+    private String status;
+
+    public BulkOperation asResponse() {
+        BulkOperation bulkOperation = new BulkOperation();
+        bulkOperation.setMethod(this.getMethod());
+        bulkOperation.setBulkId(this.getBulkId());
+        bulkOperation.setLocation(this.getLocation());
+        bulkOperation.setVersion(this.getVersion());
+        bulkOperation.setResponse(this.getResponse());
+        bulkOperation.setStatus(this.getStatus());
+        // path and data are omitted for the response
+        return bulkOperation;
+    }
 }
