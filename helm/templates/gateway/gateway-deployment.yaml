@@ -2,6 +2,10 @@
 {{- $initContainers := .Values.initContainers -}}
 {{- $serviceAccount := include "am.serviceAccount" . -}}
 {{- $logbackVolumeName := include "gateway.logbackVolumeName" . -}}
+{{- $defaultLivenessProbe := (include "gateway.defaultLivenessProbe" . | fromYaml) -}}
+{{- $defaultReadinessProbe := (include "gateway.defaultReadinessProbe" . | fromYaml) -}}
+{{- $defaultStartupProbe := (include "gateway.defaultStartupProbe" . | fromYaml) -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -135,7 +139,7 @@ spec:
                 command: {{ .Values.gateway.lifecycle.preStop }}
             {{- end }}
           {{- end }}
-          livenessProbe: {{ toYaml .Values.gateway.livenessProbe | nindent 12 }}
+          livenessProbe: {{ mergeOverwrite $defaultLivenessProbe .Values.gateway.livenessProbe | toYaml | nindent 12 }}
           readinessProbe:
             {{- if eq .Values.gateway.readinessProbe.domainSync true }}
             httpGet:
@@ -154,10 +158,12 @@ spec:
             periodSeconds: {{ .Values.gateway.readinessProbe.periodSeconds | default 30 }}
             {{- else }}
             {{- $readinessProbe := unset (.Values.gateway.readinessProbe | deepCopy) "domainSync" -}}
-            {{ toYaml $readinessProbe | nindent 12 }}
+            {{ mergeOverwrite $defaultReadinessProbe $readinessProbe | toYaml | nindent 12 }}
             {{- end }}
-          {{- if and (.Values.gateway.startupProbe) (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-          startupProbe: {{ toYaml .Values.gateway.startupProbe | nindent 12 }}
+          {{- if .Values.gateway.startupProbe }}
+          startupProbe: {{ mergeOverwrite $defaultStartupProbe .Values.gateway.startupProbe | toYaml | nindent 12 }}
+          {{- else }}
+          startupProbe: {{ toYaml $defaultStartupProbe | nindent 12 }}
           {{- end }}
           resources: {{ toYaml .Values.gateway.resources | nindent 12 }}
           volumeMounts:
