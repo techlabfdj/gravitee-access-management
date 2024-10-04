@@ -42,7 +42,6 @@ let app: any;
 let tokenEndpoint: any;
 let defaultIdp: any;
 let pub: any;
-let priv: any;
 let user: any;
 
 jest.setTimeout(200000);

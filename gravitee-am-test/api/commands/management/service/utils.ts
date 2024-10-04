@@ -32,6 +32,7 @@ import { ResourceApi } from '@management-apis/ResourceApi';
 import { DeviceIdentifiersApi } from '@management-apis/DeviceIdentifiersApi';
 import { PasswordPolicyApi } from '@management-apis/PasswordPolicyApi';
 import { ExtensionGrantApi } from '@management-apis/ExtensionGrantApi';
+import { BotDetectionApi } from '@management-apis/BotDetectionApi';
 
 function createAccessTokenConfig(accessToken) {
   return new Configuration({ ...managementConf, apiKey: 'Bearer ' + accessToken });
@@ -108,4 +109,8 @@ export function getDeviceIdentifiersApi(accessToken) {
 
 export function getExtensionApi(accessToken) {
   return new ExtensionGrantApi(createAccessTokenConfig(accessToken));
+}
+
+export function getBotDetecionApi(accessToken) {
+  return new BotDetectionApi(createAccessTokenConfig(accessToken));
 }
