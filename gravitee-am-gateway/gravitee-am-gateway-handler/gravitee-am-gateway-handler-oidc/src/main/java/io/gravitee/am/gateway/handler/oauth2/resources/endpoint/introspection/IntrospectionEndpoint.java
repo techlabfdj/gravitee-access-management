@@ -70,23 +70,23 @@ public class IntrospectionEndpoint implements Handler<RoutingContext> {
 
     private static IntrospectionRequest createRequest(RoutingContext context) {
         String token = context.request().getParam(ConstantKeys.TOKEN_PARAM_KEY);
-        String tokenTypeHint = context.request().getParam(ConstantKeys.TOKEN_TYPE_HINT_PARAM_KEY);
-
+        String tokenTypeHintParam = context.request().getParam(ConstantKeys.TOKEN_TYPE_HINT_PARAM_KEY);
         if (token == null) {
             throw new InvalidRequestException();
         }
 
-        IntrospectionRequest introspectionRequest = new IntrospectionRequest(token);
-
-        if (tokenTypeHint != null) {
-            try {
-                introspectionRequest.setHint(TokenTypeHint.from(tokenTypeHint));
-            } catch (IllegalArgumentException iae) {
-                throw new UnsupportedTokenType(tokenTypeHint);
+        if (tokenTypeHintParam == null) {
+            return IntrospectionRequest.accessToken(token);
+        } else {
+            switch (TokenTypeHint.from(tokenTypeHintParam)){
+                case ACCESS_TOKEN:
+                    return IntrospectionRequest.accessToken(token);
+                case REFRESH_TOKEN:
+                    return IntrospectionRequest.refreshToken(token);
+                default:
+                    throw new UnsupportedTokenType(tokenTypeHintParam);
             }
         }
-
-        return introspectionRequest;
     }
 
     public void setIntrospectionService(IntrospectionService introspectionService) {

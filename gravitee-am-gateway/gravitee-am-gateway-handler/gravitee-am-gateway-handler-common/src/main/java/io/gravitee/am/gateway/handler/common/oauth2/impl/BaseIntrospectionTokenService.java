@@ -20,8 +20,11 @@ import io.gravitee.am.common.exception.oauth2.InvalidTokenException;
 import io.gravitee.am.common.jwt.JWT;
 import io.gravitee.am.gateway.handler.common.client.ClientSyncService;
 import io.gravitee.am.gateway.handler.common.jwt.JWTService;
+import io.gravitee.am.gateway.handler.common.jwt.JWTService.TokenType;
 import io.gravitee.am.gateway.handler.common.oauth2.IntrospectionTokenService;
 import io.gravitee.am.repository.oauth2.api.AccessTokenRepository;
+import io.gravitee.am.repository.oauth2.model.AccessToken;
+import io.gravitee.am.repository.oauth2.model.Token;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.slf4j.Logger;
@@ -38,27 +41,28 @@ import static io.gravitee.am.gateway.handler.common.jwt.JWTService.TokenType.ACC
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class IntrospectionTokenServiceImpl implements IntrospectionTokenService {
+abstract class BaseIntrospectionTokenService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IntrospectionTokenServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseIntrospectionTokenService.class);
     private static final long OFFLINE_VERIFICATION_TIMER_SECONDS = 10;
 
-    @Autowired
-    private JWTService jwtService;
+    private final JWTService jwtService;
+    private final ClientSyncService clientService;
+    private final TokenType tokenType;
+    BaseIntrospectionTokenService(TokenType tokenType,
+                                  JWTService jwtService,
+                                  ClientSyncService clientService) {
+        this.tokenType = tokenType;
+        this.jwtService = jwtService;
+        this.clientService = clientService;
+    }
+    protected abstract Maybe<? extends Token> findByToken(String token);
 
-    @Autowired
-    private ClientSyncService clientService;
-
-    @Lazy
-    @Autowired
-    private AccessTokenRepository accessTokenRepository;
-
-    @Override
-    public Single<JWT> introspect(String token, boolean offlineVerification) {
-        return jwtService.decode(token, ACCESS_TOKEN)
+    protected Single<JWT> introspectToken(String token, boolean offlineVerification) {
+        return jwtService.decode(token, tokenType)
                 .flatMapMaybe(jwt -> clientService.findByDomainAndClientId(jwt.getDomain(), jwt.getAud()))
                 .switchIfEmpty(Single.error(() -> new InvalidTokenException("Invalid or unknown client for this token")))
-                .flatMap(client -> jwtService.decodeAndVerify(token, client, ACCESS_TOKEN))
+                .flatMap(client -> jwtService.decodeAndVerify(token, client, tokenType))
                 .flatMap(jwt -> {
                     // Just check the JWT signature and JWT validity if offline verification option is enabled
                     // or if the token has just been created (could not be in database so far because of async database storing process delay)
@@ -67,7 +71,7 @@ public class IntrospectionTokenServiceImpl implements IntrospectionTokenService 
                     }
 
                     // check if token is not revoked
-                    return accessTokenRepository.findByToken(jwt.getJti())
+                    return findByToken(jwt.getJti())
                             .switchIfEmpty(Single.error(() -> new InvalidTokenException("The token is invalid", "Token with JTI [" + jwt.getJti() + "] not found in the database", jwt)))
                             .map(accessToken -> {
                                 if (accessToken.getExpireAt().before(new Date())) {

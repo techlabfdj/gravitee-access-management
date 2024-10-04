@@ -15,31 +15,27 @@
  */
 package io.gravitee.am.gateway.handler.oauth2.service.introspection;
 
-import io.gravitee.am.common.oauth2.TokenTypeHint;
+import io.gravitee.am.gateway.handler.oauth2.service.token.Token;
+import io.gravitee.am.gateway.handler.oauth2.service.token.impl.AccessToken;
+import io.gravitee.am.gateway.handler.oauth2.service.token.impl.RefreshToken;
+import lombok.Value;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
+
+@Value
 public class IntrospectionRequest {
 
-    private final String token;
+    Token token;
 
-    private TokenTypeHint hint;
-
-    public IntrospectionRequest(final String token) {
-        this.token = token;
+    public static IntrospectionRequest accessToken(String token){
+        return new IntrospectionRequest(new AccessToken(token));
     }
 
-    public String getToken() {
-        return token;
+    public static IntrospectionRequest refreshToken(String token){
+        return new IntrospectionRequest(new RefreshToken(token));
     }
 
-    public TokenTypeHint getHint() {
-        return hint;
-    }
-
-    public void setHint(TokenTypeHint hint) {
-        this.hint = hint;
-    }
 }

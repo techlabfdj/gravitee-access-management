@@ -23,6 +23,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class OAuth2AuthProviderImpl implements OAuth2AuthProvider {
 
     @Autowired
+    @Qualifier("AccessTokenIntrospection")
     private IntrospectionTokenService introspectionTokenService;
 
     @Autowired

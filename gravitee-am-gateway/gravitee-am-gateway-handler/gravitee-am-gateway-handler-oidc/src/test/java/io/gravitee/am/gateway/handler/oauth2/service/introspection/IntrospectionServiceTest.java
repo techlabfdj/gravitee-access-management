@@ -58,10 +58,10 @@ public class IntrospectionServiceTest {
         AccessToken accessToken = new AccessToken(token);
         accessToken.setSubject("user");
         accessToken.setClientId("client-id");
-        when(tokenService.introspect("token")).thenReturn(Single.just(accessToken));
+        when(tokenService.introspect(accessToken)).thenReturn(Single.just(accessToken));
         when(userService.findById("user")).thenReturn(Maybe.just(new User()));
 
-        IntrospectionRequest introspectionRequest = new IntrospectionRequest(token);
+        IntrospectionRequest introspectionRequest = new IntrospectionRequest(accessToken);
         TestObserver<IntrospectionResponse> testObserver = introspectionService.introspect(introspectionRequest).test();
 
         testObserver.awaitDone(10, TimeUnit.SECONDS);
@@ -76,9 +76,9 @@ public class IntrospectionServiceTest {
         AccessToken accessToken = new AccessToken(token);
         accessToken.setSubject("client-id");
         accessToken.setClientId("client-id");
-        when(tokenService.introspect("token")).thenReturn(Single.just(accessToken));
+        when(tokenService.introspect(accessToken)).thenReturn(Single.just(accessToken));
 
-        IntrospectionRequest introspectionRequest = new IntrospectionRequest(token);
+        IntrospectionRequest introspectionRequest = new IntrospectionRequest(accessToken);
         TestObserver<IntrospectionResponse> testObserver = introspectionService.introspect(introspectionRequest).test();
 
         testObserver.awaitDone(10, TimeUnit.SECONDS);
@@ -96,9 +96,9 @@ public class IntrospectionServiceTest {
         accessToken.setCreatedAt(new Date());
         accessToken.setExpireAt(new Date());
         accessToken.setAdditionalInformation(Collections.singletonMap("custom-claim", "test"));
-        when(tokenService.introspect(token)).thenReturn(Single.just(accessToken));
+        when(tokenService.introspect(accessToken)).thenReturn(Single.just(accessToken));
 
-        IntrospectionRequest introspectionRequest = new IntrospectionRequest(token);
+        IntrospectionRequest introspectionRequest = new IntrospectionRequest(accessToken);
         TestObserver<IntrospectionResponse> testObserver = introspectionService.introspect(introspectionRequest).test();
 
         testObserver.awaitDone(10, TimeUnit.SECONDS);
@@ -116,9 +116,9 @@ public class IntrospectionServiceTest {
         accessToken.setCreatedAt(new Date());
         accessToken.setExpireAt(new Date());
         accessToken.setAdditionalInformation(Collections.singletonMap(Claims.aud, "test-aud"));
-        when(tokenService.introspect(token)).thenReturn(Single.just(accessToken));
+        when(tokenService.introspect(accessToken)).thenReturn(Single.just(accessToken));
 
-        IntrospectionRequest introspectionRequest = new IntrospectionRequest(token);
+        IntrospectionRequest introspectionRequest = new IntrospectionRequest(accessToken);
         TestObserver<IntrospectionResponse> testObserver = introspectionService.introspect(introspectionRequest).test();
 
         testObserver.awaitDone(10, TimeUnit.SECONDS);

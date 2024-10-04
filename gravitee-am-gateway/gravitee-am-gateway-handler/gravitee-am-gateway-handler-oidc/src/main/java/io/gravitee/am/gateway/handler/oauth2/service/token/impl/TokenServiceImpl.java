@@ -25,7 +25,7 @@ import io.gravitee.am.common.utils.ConstantKeys;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.common.utils.SecureRandomString;
 import io.gravitee.am.gateway.handler.common.jwt.JWTService;
-import io.gravitee.am.gateway.handler.common.oauth2.IntrospectionTokenService;
+import io.gravitee.am.gateway.handler.common.oauth2.IntrospectionTokenFacade;
 import io.gravitee.am.gateway.handler.context.ExecutionContextFactory;
 import io.gravitee.am.gateway.handler.oauth2.exception.InvalidGrantException;
 import io.gravitee.am.gateway.handler.oauth2.service.request.OAuth2Request;
@@ -99,7 +99,7 @@ public class TokenServiceImpl implements TokenService {
     private TokenManager tokenManager;
 
     @Autowired
-    private IntrospectionTokenService introspectionTokenService;
+    private IntrospectionTokenFacade introspectionTokenFacade;
 
     @Override
     public Maybe<Token> getAccessToken(String token, Client client) {
@@ -126,10 +126,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Single<Token> introspect(String token) {
-        return introspectionTokenService.introspect(token, false)
-                .map(this::convertAccessToken);
+    public Single<Token> introspect(Token token) {
+        if(token instanceof RefreshToken){
+            return introspectionTokenFacade.introspectRefreshToken(token.getValue())
+                    .map(this::convertRefreshToken);
+        } else {
+            return introspectionTokenFacade.introspectAccessToken(token.getValue())
+                    .map(this::convertAccessToken);
+        }
     }
+
 
     @Override
     public Single<Token> create(OAuth2Request oAuth2Request, Client client, User endUser) {
