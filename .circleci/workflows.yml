@@ -64,7 +64,7 @@ executors:
 parameters:
   gio_action:
     type: enum
-    enum: [ release, publish_maven_central, publish_rpms, publish_docker_images, pull_requests, release_notes_am, release_helm , publish-images-azure-registry, release-version, release-alpha-version ]
+    enum: [ release, publish_maven_central, publish_rpms, publish_docker_images, pull_requests, release_notes_am, release_helm , publish-images-azure-registry, release-version, release-alpha-version, publish_hotfix ]
     default: pull_requests
   gio_product:
     type: enum
@@ -93,6 +93,10 @@ parameters:
     type: boolean
     default: true
     description: "Is this a latest support version of the Product ? (if so minor version tagging docker images). True by default."
+  fix_version:
+    type: string
+    default: "none"
+    description: "This is a fix version from which docker tag will be created for hotfix pipeline"
 
 commands:
   create_docker_context:
@@ -1481,6 +1485,65 @@ jobs:
               docker buildx build --push --platform=linux/arm64,linux/amd64 -f docker/management-ui/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_management_ui} docker/management-ui/
             
             fi;
+
+  build_n_push_hotfix_job:
+    description: This Orb Job performs the docker build and publish of hotfix for the am_ce dockerfile
+    parameters:
+      fix_version:
+        type: string
+        default: "none"
+        description: "The tag name under which the hotfix will be released."
+      dry_run:
+        type: boolean
+        default: true
+        description: "Running in dry run mode means no docker push (Defaults to true)"
+    executor:
+      name: ubuntu
+      class: large
+      with_docker_layer_caching: true
+    environment:
+      DRY_RUN: << parameters.dry_run >>
+      FIX_VERSION: << parameters.fix_version >>
+    steps:
+      - checkout
+      - git_config
+      - keeper/env-export:
+          secret-url: keeper://cooU9UoXIk8Kj0hsP2rkBw/field/login
+          var-name: DOCKERHUB_BOT_USER_NAME
+      - keeper/env-export:
+          secret-url: keeper://cooU9UoXIk8Kj0hsP2rkBw/field/password
+          var-name: DOCKERHUB_BOT_USER_TOKEN
+      - create_docker_context
+      - run:
+          name: "Build Docker Images: Gravitee AM Community Edition"
+          command: |
+            export RELEASE_VERSION=$FIX_VERSION
+
+            tag_gateway="-t graviteeio/am-gateway:${RELEASE_VERSION}"
+            tag_management_api="-t graviteeio/am-management-api:${RELEASE_VERSION}"
+            tag_management_ui="-t graviteeio/am-management-ui:${RELEASE_VERSION}"
+            
+            if [ "${FIX_VERSION}" == "none" ]; then
+              echo "You need to specify fix_version"
+              exit 1
+            fi;
+
+            docker login --username="${DOCKERHUB_BOT_USER_NAME}" -p="${DOCKERHUB_BOT_USER_TOKEN}"
+
+            if [ "${DRY_RUN}" == "true" ]; then
+              echo "# --->>> THIS IS A DRY RUN : Build images without push"
+            
+              docker buildx build --platform=linux/arm64,linux/amd64 -f docker/gateway/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_gateway} docker/gateway/
+              docker buildx build --platform=linux/arm64,linux/amd64 -f docker/management-api/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_management_api} docker/management-api/
+              docker buildx build --platform=linux/arm64,linux/amd64 -f docker/management-ui/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_management_ui} docker/management-ui/
+
+            else
+
+              docker buildx build --push --platform=linux/arm64,linux/amd64 -f docker/gateway/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_gateway} docker/gateway/
+              docker buildx build --push --platform=linux/arm64,linux/amd64 -f docker/management-api/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_management_api} docker/management-api/
+              docker buildx build --push --platform=linux/arm64,linux/amd64 -f docker/management-ui/Dockerfile --build-arg GRAVITEEAM_VERSION=${RELEASE_VERSION} ${tag_management_ui} docker/management-ui/
+
+            fi;
   publish_am_rpms:
     description: Runs the commands to build n publish RPM Packages for Gravitee.io AM
     executor: ubuntu
@@ -2097,6 +2160,19 @@ workflows:
           context: cicd-orchestrator
           requires:
             - build_n_push_am_ce_job
+
+  publish_hotfix_docker_images:
+    when:
+      equal: [ publish_hotfix, << pipeline.parameters.gio_action >> ]
+    jobs:
+      - build_n_push_hotfix_job:
+          context: cicd-orchestrator
+          fix_version: << pipeline.parameters.fix_version >>
+          dry_run: << pipeline.parameters.dry_run >>
+      - add-docker-images-in-aqua:
+          context: cicd-orchestrator
+          requires:
+            - build_n_push_hotfix_job
 
   daily-purge-azure-registry:
     triggers:
