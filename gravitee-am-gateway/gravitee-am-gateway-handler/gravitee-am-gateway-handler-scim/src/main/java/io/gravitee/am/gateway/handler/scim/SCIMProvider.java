@@ -21,6 +21,7 @@ import io.gravitee.am.gateway.handler.common.jwt.SubjectManager;
 import io.gravitee.am.gateway.handler.common.vertx.web.auth.handler.OAuth2AuthHandler;
 import io.gravitee.am.gateway.handler.common.vertx.web.auth.provider.OAuth2AuthProvider;
 import io.gravitee.am.gateway.handler.scim.resources.ErrorHandler;
+import io.gravitee.am.gateway.handler.scim.resources.bulk.BulkEndpoint;
 import io.gravitee.am.gateway.handler.scim.resources.configuration.ServiceProviderConfigurationEndpointHandler;
 import io.gravitee.am.gateway.handler.scim.resources.groups.GroupEndpoint;
 import io.gravitee.am.gateway.handler.scim.resources.groups.GroupsEndpoint;
@@ -117,6 +118,9 @@ public class SCIMProvider extends AbstractProtocolProvider {
             scimRouter.put("/Groups/:id").handler(groupEndpoint::update);
             scimRouter.patch("/Groups/:id").handler(groupEndpoint::patch);
             scimRouter.delete("/Groups/:id").handler(groupEndpoint::delete);
+
+            BulkEndpoint bulkEndpoint = new BulkEndpoint();
+            scimRouter.post("/Bulk").handler(bulkEndpoint::execute);
 
             // error handler
             scimRouter.route().failureHandler(new ErrorHandler());
