@@ -18,14 +18,13 @@ package io.gravitee.am.gateway.handler.scim.business;
 
 
 import io.gravitee.am.common.scim.Schema;
-import io.gravitee.am.gateway.handler.common.utils.Tuple;
 import io.gravitee.am.gateway.handler.scim.exception.InvalidSyntaxException;
 import io.gravitee.am.gateway.handler.scim.exception.InvalidValueException;
 import io.gravitee.am.gateway.handler.scim.model.EnterpriseUser;
 import io.gravitee.am.gateway.handler.scim.model.GraviteeUser;
 import io.gravitee.am.gateway.handler.scim.model.User;
 import io.gravitee.am.gateway.handler.scim.service.UserService;
-import io.gravitee.am.identityprovider.api.SimpleAuthenticationContext;
+import io.gravitee.am.identityprovider.api.AuthenticationContext;
 import io.gravitee.am.model.Domain;
 import io.gravitee.am.model.oidc.Client;
 import io.reactivex.rxjava3.core.Maybe;
@@ -41,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
@@ -49,12 +47,12 @@ import java.util.function.Supplier;
  */
 @Slf4j
 @AllArgsConstructor
-public class CreateUser {
+public class CreateUserAction {
     private UserService userService;
     private Domain domain;
     private Client client;
 
-    public Single<User> create(String baseUrl, Map<String, Object> payload, SimpleAuthenticationContext authenticationContext, Supplier<Maybe<Optional<io.gravitee.am.identityprovider.api.User>>> principal) {
+    public Single<User> execute(String baseUrl, Map<String, Object> payload, AuthenticationContext authenticationContext, io.gravitee.am.identityprovider.api.User principal) {
         final List<String> schemas = (List<String>) Optional.ofNullable(payload.get("schemas")).orElse(Collections.emptyList());
 
         final User user = evaluateUser(schemas, payload);
@@ -72,12 +70,10 @@ public class CreateUser {
         }
 
         // handle identity provider source
-        return principal.get()
-                .zipWith(userSource(authenticationContext), Tuple::of)
+        return userSource(authenticationContext)
                 .toSingle()
-                .flatMap(optPrincipal -> userService.create(user, optPrincipal.getT2().orElse(null), baseUrl, optPrincipal.getT1().orElse(null), client));
+                .flatMap(optSource -> userService.create(user, optSource.orElse(null), baseUrl, principal, client));
     }
-
 
     // Common method on all User Operations
     protected User evaluateUser(List<String> schemas, Map<String, Object> payload) {
@@ -106,7 +102,7 @@ public class CreateUser {
         });
     }
 
-    protected Maybe<Optional<String>> userSource(SimpleAuthenticationContext authenticationContext) {
+    protected Maybe<Optional<String>> userSource(AuthenticationContext authenticationContext) {
         if (domain.getScim() != null
                 && domain.getScim().isIdpSelectionEnabled()
                 && StringUtils.hasText(domain.getScim().getIdpSelectionRule())) {

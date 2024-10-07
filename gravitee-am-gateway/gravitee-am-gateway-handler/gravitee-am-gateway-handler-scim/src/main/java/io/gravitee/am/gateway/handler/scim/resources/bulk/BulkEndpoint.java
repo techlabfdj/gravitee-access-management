@@ -21,25 +21,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.am.common.jwt.JWT;
 import io.gravitee.am.common.utils.ConstantKeys;
 import io.gravitee.am.gateway.handler.common.jwt.SubjectManager;
+import io.gravitee.am.gateway.handler.common.utils.Tuple;
 import io.gravitee.am.gateway.handler.common.vertx.core.http.VertxHttpServerRequest;
 import io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest;
-import io.gravitee.am.gateway.handler.scim.business.CreateUser;
 import io.gravitee.am.gateway.handler.scim.exception.InvalidSyntaxException;
 import io.gravitee.am.gateway.handler.scim.exception.InvalidValueException;
 import io.gravitee.am.gateway.handler.scim.exception.TooManyOperationException;
-import io.gravitee.am.gateway.handler.scim.model.BulkOperation;
 import io.gravitee.am.gateway.handler.scim.model.BulkRequest;
-import io.gravitee.am.gateway.handler.scim.model.BulkResponse;
-import io.gravitee.am.gateway.handler.scim.model.Error;
-import io.gravitee.am.gateway.handler.scim.service.UserService;
+import io.gravitee.am.gateway.handler.scim.service.BulkService;
 import io.gravitee.am.identityprovider.api.SimpleAuthenticationContext;
-import io.gravitee.am.model.Domain;
 import io.gravitee.common.http.HttpHeaders;
-import io.gravitee.common.http.HttpMethod;
-import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.common.http.MediaType;
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.rxjava3.core.http.HttpServerRequest;
@@ -48,15 +41,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
-import java.util.Set;
 
-import static io.gravitee.common.http.HttpMethod.DELETE;
-import static io.gravitee.common.http.HttpMethod.PATCH;
-import static io.gravitee.common.http.HttpMethod.POST;
-import static io.gravitee.common.http.HttpMethod.PUT;
-import static java.lang.String.valueOf;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static org.springframework.util.StringUtils.hasText;
 
 /**
  * @author Eric LELEU (eric.leleu at graviteesource.com)
@@ -74,73 +60,35 @@ public class BulkEndpoint {
      * Maximum number of operations for Bulk request
      */
     private final static int BULK_MAX_REQUEST_OPERATIONS = 1000; // TODO make this configurable in AM-3572
-    public static final Set<String> ALLOAWED_METHODS = Set.of(DELETE.name(), POST.name(), PATCH.name(), PUT.name());
 
-    private UserService userService;
+    private BulkService bulkService;
     private ObjectMapper objectMapper;
-    private Domain domain;
     private SubjectManager subjectManager;
 
     public void execute(RoutingContext context) {
+        // accessToken is used to determine the principal user
+        final JWT accessToken = context.get(ConstantKeys.TOKEN_CONTEXT_KEY);
 
         parseRequestBody(context)
                 .switchIfEmpty(Maybe.error(() -> new InvalidSyntaxException("BulkRequest is required")))
                 .toSingle()
                 .map(this::checkBulkRequest)
-                .flatMap(bulkRequest -> {
+                .zipWith(principal(accessToken), Tuple::of)
+                .flatMap(tuple -> {
+                    final var bulkRequest = tuple.getT1();
+                    final var principal = tuple.getT2();
+
                     // we need to build a context in order to evaluate the sourceId during user creation
                     SimpleAuthenticationContext authenticationContext = new SimpleAuthenticationContext(new VertxHttpServerRequest(context.request().getDelegate()));
                     authenticationContext.attributes().putAll(context.data());
 
-                    // accessToken is used to determine the principal user
-                    final JWT accessToken = context.get(ConstantKeys.TOKEN_CONTEXT_KEY);
-
-                    return Flowable.fromIterable(bulkRequest.getOperations())
-                            .map(this::checkOperation)
-                            .flatMapSingle(operation -> {
-                                final String baseUrl = location(context.request(), operation.getPath());
-                                switch (HttpMethod.valueOf(operation.getMethod())) {
-                                    case POST:
-                                        return new CreateUser(userService, domain, context.get(ConstantKeys.CLIENT_CONTEXT_KEY))
-                                                .create(baseUrl, operation.getData(), authenticationContext, () -> principal(accessToken)/*TODO optimize this as each operation will read the user profile*/)
-                                                .map(scimUser -> {
-                                                    operation.setLocation(scimUser.getMeta().getLocation());
-                                                    operation.setStatus(valueOf(HttpStatusCode.CREATED_201));
-                                                    // response attribute is not set for successful operation
-                                                    // so no need to provide the scimUser in the operation.response
-                                                    return operation.asResponse();
-                                                }).onErrorResumeNext(ex-> {
-                                                    final var knownError = Error.fromThrowable(ex);
-                                                    if (knownError.isPresent()) {
-                                                        operation.setResponse(knownError.get());
-                                                    } else {
-                                                        Error error = new Error();
-                                                        error.setStatus(valueOf(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-                                                        error.setDetail(ex.getMessage());
-                                                        operation.setResponse(error);
-                                                    }
-                                                    return Single.just(operation.asResponse());
-                                                });
-                                    default:
-                                        Error error = new Error();
-                                        error.setScimType("invalidSyntax"); // should not happen
-                                        operation.setResponse(error);
-                                        return Single.just(operation.asResponse());
-
-                                }
-                            }).toList()
-                            .map(responses -> {
-                                final var bulkResponse = new BulkResponse();
-                                bulkResponse.setOperations(responses);
-                                return bulkResponse;
-                            });
+                    return bulkService.processBulkRequest(bulkRequest, authenticationContext, location(context.request()), context.get(ConstantKeys.CLIENT_CONTEXT_KEY), principal.orElse(null));
                 })
                 .subscribe(bulkResponse -> context.response()
                                 .putHeader(HttpHeaders.CACHE_CONTROL, "no-store")
                                 .putHeader(HttpHeaders.PRAGMA, "no-cache")
                                 .putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                                .end(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bulkResponse))
-                        ,
+                                .end(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bulkResponse)),
                         context::fail);
     }
 
@@ -165,38 +113,14 @@ public class BulkEndpoint {
         return bulkRequest;
     }
 
-    private BulkOperation checkOperation(BulkOperation operation) {
-        if (!(hasText(operation.getPath()) && operation.getPath().startsWith("/Users"))) {
-            // only Users operations are managed currently
-            log.debug("Bulk operation requires path starting with /Users");
-            throw new InvalidValueException("Bulk operation requires path starting with /Users");
-        }
-
-        if (!ALLOAWED_METHODS.contains(operation.getMethod())) {
-            log.debug("Bulk operation doesn't support method {}", operation.getMethod());
-            throw new InvalidValueException("Bulk operation doesn't support method " + operation.getMethod());
-        }
-
-        if (!operation.getMethod().equals(DELETE.name()) && isEmpty(operation.getData())) {
-            log.debug("Bulk operation requires data with method {}", operation.getMethod());
-            throw new InvalidValueException("Bulk operation requires data with method " + operation.getMethod());
-        }
-
-        if (operation.getMethod().equals(POST.name()) && !hasText(operation.getBulkId())) {
-            log.debug("Bulk operation requires bulkId with method POST");
-            throw new InvalidValueException("Bulk operation requires bulkId with method POST");
-        }
-
-        return operation;
+    protected Single<Optional<io.gravitee.am.identityprovider.api.User>> principal(JWT jwt) {
+        return this.subjectManager.getPrincipal(jwt)
+                .map(Optional::ofNullable)
+                .switchIfEmpty(Maybe.just(Optional.empty()))
+                .toSingle();
     }
 
-
-    protected Maybe<Optional<io.gravitee.am.identityprovider.api.User>> principal(JWT jwt) {
-        return this.subjectManager.getPrincipal(jwt).map(Optional::ofNullable)
-                .switchIfEmpty(Maybe.just(Optional.empty()));
-    }
-
-    protected String location(HttpServerRequest request, String path) {
-        return UriBuilderRequest.resolveProxyRequest(request, request.path().replaceFirst("/Bulk(/)?", path));
+    protected String location(HttpServerRequest request) {
+        return UriBuilderRequest.resolveProxyRequest(request, request.path());
     }
 }
