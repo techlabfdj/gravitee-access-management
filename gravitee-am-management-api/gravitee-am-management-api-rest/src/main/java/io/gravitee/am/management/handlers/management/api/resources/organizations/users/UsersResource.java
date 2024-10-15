@@ -35,10 +35,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -163,10 +165,36 @@ public class UsersResource extends AbstractUsersResource {
                         .flatMap(organization -> newOrganizationUsers.processOneByOne(user ->
                                 organizationUserService.createGraviteeUser(organization, user, authenticatedUser)
                                         .map(BulkOperationResult::created)
-                                        .onErrorResumeNext(ex -> Single.just(BulkOperationResult.error(Response.Status.BAD_REQUEST, ex)))
+                                        .onErrorResumeNext(ex -> Single.just(BulkOperationResult.error(Response.Status.BAD_REQUEST, ex.getMessage())))
                         )))
                 .subscribe(response::resume, response::resume);
     }
+
+    @DELETE
+    @Path("/bulk")
+    @Operation(summary = "Delete a bulk of users",
+            operationId = "deleteOrganizationBulkUsers",
+            description = "User must have the ORGANIZATION_USER[DELETE] permission on the specified organization")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "User successfully deleted"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public void bulkDelete(
+            @PathParam("organizationId") String organizationId,
+            @Parameter(required = true) @Valid @NotNull final BulkRequest<String> request,
+            @Suspended final AsyncResponse response){
+        final io.gravitee.am.identityprovider.api.User authenticatedUser = getAuthenticatedUser();
+
+        checkPermission(ReferenceType.ORGANIZATION, organizationId, Permission.ORGANIZATION_USER, Acl.DELETE)
+                .andThen(request.processOneByOne(id -> organizationUserService
+                        .delete(ReferenceType.ORGANIZATION, organizationId, id, authenticatedUser)
+                        .map(User::getId)
+                        .map(BulkOperationResult::ok)
+                        .onErrorResumeNext(ex -> Single.just(BulkOperationResult.error(Response.Status.BAD_REQUEST, ex.getMessage())))
+
+                ))
+                .subscribe(response::resume, response::resume);
+    }
+
 
     @Path("{user}")
     public UserResource getUserResource() {
