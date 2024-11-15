@@ -118,6 +118,7 @@ databaseChangeLog:
   - include:
       - file: liquibase/changelogs/v4_1_0/4.1.23-update-user-identities-table.yml
   - include:
+<<<<<<< HEAD
       - file: liquibase/changelogs/v4_2_0/4.2.0-update-applications-table.yml
   - include:
       - file: liquibase/changelogs/v4_3_0/4.3.0-license-notification-permission.yml
@@ -133,3 +134,6 @@ databaseChangeLog:
       - file: liquibase/changelogs/v4_4_0/4.4.0-update-users-table.yml
   - include:
       - file: liquibase/changelogs/v4_4_0/4.4.0-update-organization-users-table.yml
+=======
+      - file: liquibase/changelogs/v4_1_0/4.1.35-update-web-credential-index.yml
+>>>>>>> 3f17d71a36 (fix: create index on credentials using createdAt and username)
