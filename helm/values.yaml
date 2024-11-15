@@ -244,7 +244,6 @@ applications:
 
 api:
   enabled: true
-  upgrader: false
   name: management-api
   logging:
     debug: false
