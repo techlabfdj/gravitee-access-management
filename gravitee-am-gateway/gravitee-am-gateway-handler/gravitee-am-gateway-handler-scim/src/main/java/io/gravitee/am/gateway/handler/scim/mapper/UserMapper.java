@@ -31,7 +31,9 @@ import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +50,8 @@ import static java.util.stream.Collectors.toList;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
+
+    public static final String LAST_PASSWORD_RESET_KEY = "lastPasswordReset";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMapper.class);
 
@@ -193,6 +197,10 @@ public class UserMapper {
 
         // set additional information
         if (scimUser instanceof GraviteeUser graviteeUser && graviteeUser.getAdditionalInformation() != null) {
+            var lastPasswordReset = graviteeUser.getAdditionalInformation().get(LAST_PASSWORD_RESET_KEY);
+            if (lastPasswordReset instanceof Long) {
+                user.setLastPasswordReset(Date.from(Instant.ofEpochMilli((Long) lastPasswordReset)));
+            }
             additionalInformation.putAll(graviteeUser.getAdditionalInformation());
         }
         user.setAdditionalInformation(additionalInformation);
