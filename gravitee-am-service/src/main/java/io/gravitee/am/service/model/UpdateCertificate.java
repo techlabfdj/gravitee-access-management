@@ -16,6 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.service.validators.jsonstring.JsonString;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -25,9 +26,11 @@ import jakarta.validation.constraints.NotNull;
 public class UpdateCertificate implements PluginConfigurationPayload {
 
     @NotNull
+    @NotEmpty(message = "name can't be empty")
     private String name;
 
     @NotNull
+    @NotEmpty(message = "type can't be empty")
     private String type;
 
     @NotNull

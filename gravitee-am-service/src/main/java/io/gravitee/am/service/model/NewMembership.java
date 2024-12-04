@@ -16,7 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.model.membership.MemberType;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -24,11 +24,11 @@ import jakarta.validation.constraints.NotNull;
  */
 public class NewMembership {
 
-    @NotNull
+    @NotBlank
     private String memberId;
-    @NotNull
+    @NotBlank
     private MemberType memberType;
-    @NotNull
+    @NotBlank
     private String role;
 
     public String getMemberId() {

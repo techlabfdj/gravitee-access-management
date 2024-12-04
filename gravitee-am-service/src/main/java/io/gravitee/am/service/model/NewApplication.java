@@ -16,6 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.model.application.ApplicationType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.Map;
  */
 public class NewApplication {
 
-    @NotNull
+    @NotBlank
     private String name;
 
     @NotNull

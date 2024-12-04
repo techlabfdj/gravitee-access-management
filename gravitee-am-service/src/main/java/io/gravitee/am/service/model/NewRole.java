@@ -16,7 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.model.ReferenceType;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -24,7 +24,7 @@ import jakarta.validation.constraints.NotNull;
  */
 public class NewRole {
 
-    @NotNull
+    @NotBlank
     private String name;
 
     private ReferenceType assignableType;

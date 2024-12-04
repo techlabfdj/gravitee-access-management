@@ -16,6 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.service.validators.jsonstring.JsonString;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +32,7 @@ import java.util.Map;
 @Setter
 public class UpdateIdentityProvider {
 
-    @NotNull
+    @NotBlank
     private String name;
 
     @NotNull

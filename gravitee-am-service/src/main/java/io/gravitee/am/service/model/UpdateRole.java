@@ -15,7 +15,7 @@
  */
 package io.gravitee.am.service.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class UpdateRole {
 
-    @NotNull
+    @NotBlank
     private String name;
 
     private String description;

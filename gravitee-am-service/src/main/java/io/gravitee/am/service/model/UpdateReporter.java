@@ -16,6 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.service.validators.jsonstring.JsonString;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -28,7 +29,7 @@ public class UpdateReporter {
 
     private boolean enabled;
 
-    @NotNull
+    @NotBlank
     private String name;
 
     @NotNull

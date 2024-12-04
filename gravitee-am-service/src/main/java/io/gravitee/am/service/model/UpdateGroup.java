@@ -15,7 +15,7 @@
  */
 package io.gravitee.am.service.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class UpdateGroup {
 
-    @NotNull
+    @NotBlank
     private String name;
     private String description;
     private List<String> members;

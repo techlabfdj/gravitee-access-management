@@ -16,6 +16,7 @@
 package io.gravitee.am.service.model;
 
 import io.gravitee.am.service.validators.jsonstring.JsonString;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -26,13 +27,13 @@ public class NewFactor {
 
     private String id;
 
-    @NotNull
+    @NotBlank
     private String type;
 
-    @NotNull
+    @NotBlank
     private String factorType;
 
-    @NotNull
+    @NotBlank
     private String name;
 
     @NotNull

@@ -15,7 +15,7 @@
  */
 package io.gravitee.am.service.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
  */
 public class NewDomain {
 
-    @NotNull
+    @NotBlank
     private String name;
 
     private String description;

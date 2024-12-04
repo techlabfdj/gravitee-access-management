@@ -19,6 +19,7 @@ import io.gravitee.am.model.VirtualHost;
 import io.gravitee.am.model.account.AccountSettings;
 import io.gravitee.am.model.login.LoginSettings;
 import io.gravitee.am.model.scim.SCIMSettings;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class UpdateDomain {
     /**
      * Domain name.
      */
-    @NotNull
+    @NotBlank
     private String name;
 
     /**
