@@ -15,9 +15,11 @@
  */
 package io.gravitee.am.management.handlers.management.api.resources.organizations.environments;
 
+import io.gravitee.am.dataplane.api.DataPlane;
 import io.gravitee.am.management.handlers.management.api.resources.AbstractResource;
 import io.gravitee.am.model.Acl;
 import io.gravitee.am.model.permissions.Permission;
+import io.gravitee.am.plugins.dataplane.core.MultiDataPlaneLoader;
 import io.gravitee.common.http.MediaType;
 import io.reactivex.rxjava3.core.Maybe;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,11 +34,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -45,6 +43,9 @@ import java.util.List;
  */
 @Tag(name = "dataPlane")
 public class DataPlanesResource extends AbstractResource {
+
+    @Autowired
+    private MultiDataPlaneLoader multiDataPlaneLoader;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -64,28 +65,8 @@ public class DataPlanesResource extends AbstractResource {
             @Suspended final AsyncResponse response) {
 
         checkAnyPermission(organizationId, environmentId, Permission.DOMAIN, Acl.CREATE)
-                .andThen(mockData())
-                //TODO: Change to real implementation. This is just a mock!
-                //use MultiDataPlaneLoader.getDataPlanes() when AM-4591 merged.
+                .andThen(Maybe.just(multiDataPlaneLoader.getDataPlanes().stream()))
                 .subscribe(response::resume, response::resume);
-    }
-
-    //TODO: remove when AM-4591 merged.
-    public Maybe<List<DataPlane>> mockData() {
-        if (Math.random() < 0.5) {
-            return Maybe.just(List.of(new DataPlane("default", "Default DP")));
-        } else {
-            return Maybe.just(List.of(new DataPlane("default", "Default DP"), new DataPlane("second", "Second DP")));
-        }
-    }
-
-    //TODO: remove when AM-4591 merged.
-    @AllArgsConstructor
-    @Getter
-    @Setter
-    public class DataPlane {
-        private String id;
-        private String name;
     }
 
 }

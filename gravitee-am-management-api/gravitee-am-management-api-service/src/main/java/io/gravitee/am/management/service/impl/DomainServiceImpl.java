@@ -23,6 +23,7 @@ import io.gravitee.am.common.exception.oauth2.OAuth2Exception;
 import io.gravitee.am.common.utils.GraviteeContext;
 import io.gravitee.am.common.utils.RandomString;
 import io.gravitee.am.common.web.UriBuilder;
+import io.gravitee.am.dataplane.api.DataPlaneDescription;
 import io.gravitee.am.identityprovider.api.User;
 import io.gravitee.am.management.service.DefaultIdentityProviderService;
 import io.gravitee.am.management.service.DomainService;
@@ -40,6 +41,7 @@ import io.gravitee.am.model.common.event.Payload;
 import io.gravitee.am.model.membership.MemberType;
 import io.gravitee.am.model.oidc.OIDCSettings;
 import io.gravitee.am.model.permissions.SystemRole;
+import io.gravitee.am.plugins.dataplane.core.MultiDataPlaneLoader;
 import io.gravitee.am.repository.management.api.DomainRepository;
 import io.gravitee.am.repository.management.api.search.AlertNotifierCriteria;
 import io.gravitee.am.repository.management.api.search.AlertTriggerCriteria;
@@ -148,8 +150,8 @@ public class DomainServiceImpl implements DomainService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
 
-//    @Autowired
-//    private MultiDataPlaneLoader multiDataPlaneLoader; // TODO: uncomment when AM-4591 merged.
+    @Autowired
+    private MultiDataPlaneLoader multiDataPlaneLoader;
 
     @Lazy
     @Autowired
@@ -339,9 +341,9 @@ public class DomainServiceImpl implements DomainService {
         LOGGER.debug("Create a new domain: {}", newDomain);
         // generate hrid
         String hrid = IdGenerator.generate(newDomain.getName());
-//        if(multiDataPlaneLoader.getDataPlanes().stream().map(DataPlane::getId).noneMatch(id->id.equals(newDomain.getDataPlaneId()))){
-//            return Single.error(new TechnicalManagementException("An error occurred while trying to create a domain. Data plane with provided Id doesn't exist"));
-//        } // TODO: uncomment when AM-4591 merged.
+        if (multiDataPlaneLoader.getDataPlanes().stream().map(DataPlaneDescription::id).noneMatch(id -> id.equals(newDomain.getDataPlaneId()))) {
+            return Single.error(new TechnicalManagementException("An error occurred while trying to create a domain. Data plane with provided Id doesn't exist"));
+        }
         return domainRepository.findByHrid(ReferenceType.ENVIRONMENT, environmentId, hrid)
                 .isEmpty()
                 .flatMap(empty -> {
@@ -651,7 +653,7 @@ public class DomainServiceImpl implements DomainService {
                                     .principal(principal)
                                     .type(EventType.DOMAIN_DELETED)
                                     .throwable(throwable)
-                                            .domain(domain)
+                                    .domain(domain)
                                     .reference(Reference.organization(graviteeContext.getOrganizationId()))));
                 })
                 .onErrorResumeNext(ex -> {
