@@ -22,6 +22,7 @@ import io.gravitee.am.model.permissions.Permission;
 import io.gravitee.am.plugins.dataplane.core.MultiDataPlaneLoader;
 import io.gravitee.common.http.MediaType;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,7 +66,7 @@ public class DataPlanesResource extends AbstractResource {
             @Suspended final AsyncResponse response) {
 
         checkAnyPermission(organizationId, environmentId, Permission.DOMAIN, Acl.CREATE)
-                .andThen(Maybe.just(multiDataPlaneLoader.getDataPlanes().stream()))
+                .andThen(Single.just(multiDataPlaneLoader.getDataPlanes()))
                 .subscribe(response::resume, response::resume);
     }
 
