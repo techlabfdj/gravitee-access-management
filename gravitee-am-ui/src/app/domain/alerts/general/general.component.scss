@@ -41,3 +41,6 @@
     }
   }
 }
+::ng-deep .cdk-overlay-pane {
+  width: auto !important;
+}

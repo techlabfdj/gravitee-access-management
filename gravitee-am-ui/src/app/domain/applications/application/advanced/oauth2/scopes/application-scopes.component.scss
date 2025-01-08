@@ -1,3 +1,6 @@
 .datatable-input {
   align-self: center;
 }
+::ng-deep .cdk-overlay-pane {
+  width: auto !important;
+}

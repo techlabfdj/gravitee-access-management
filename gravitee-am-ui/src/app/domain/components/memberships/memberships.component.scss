@@ -67,3 +67,6 @@
     padding: 0 !important;
   }
 }
+::ng-deep .cdk-overlay-pane {
+  width: auto !important;
+}
