@@ -652,6 +652,7 @@ public class MFAChallengeEndpoint extends MFAEndpoint {
     private void updateStrongAuthStatus(RoutingContext ctx) {
         ctx.session().put(ConstantKeys.STRONG_AUTH_COMPLETED_KEY, true);
         ctx.session().put(ConstantKeys.MFA_CHALLENGE_COMPLETED_KEY, true);
+        ctx.session().put(ConstantKeys.MFA_EXECUTED, true);
     }
 
     private void cleanSession(RoutingContext ctx) {

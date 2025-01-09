@@ -41,17 +41,18 @@ public class MfaChallengeFilter extends MfaContextHolder implements Supplier<Boo
             return true;
         }
 
-        // skip mfa Challenge if user authenticated and step is disabled
+        // skip mfa Challenge if user authenticated and MFA wasn't executed and step is disabled
         if (context.isUserFullyAuthenticated()) {
             String mfaStepUpRule = context.getStepUpRule();
-            return !context.isStepUpActive() || (context.isStepUpActive() && !isStepUpAuthentication(mfaStepUpRule));
-        } else {
+            if(context.isStepUpActive() && isStepUpAuthentication(mfaStepUpRule)){
+                return false;
+            }
+        }
             final var adaptiveMfa = evaluateAdaptiveMfa();
             final var rememberDevice = evaluateRememberDevice();
             final var strongAuth = evaluateStrongAuth();
 
             return adaptiveMfa || rememberDevice || strongAuth;
-        }
     }
 
     private Boolean evaluateAdaptiveMfa() {
@@ -115,6 +116,7 @@ public class MfaChallengeFilter extends MfaContextHolder implements Supplier<Boo
     public Boolean evaluateStrongAuth() {
         final boolean userStronglyAuth = context.isUserStronglyAuth();
         final boolean mfaSkipped = context.isMfaSkipped();
+        final boolean stronglyAuthenticated = context.isMfaExecuted();
         //If user has not matching activated factors, we enforce MFA
         if (!mfaSkipped && !context.userHasMatchingActivatedFactors()){
             return false;
@@ -139,7 +141,7 @@ public class MfaChallengeFilter extends MfaContextHolder implements Supplier<Boo
             return true;
         }
         // We check then if StepUp is not active and of user is strongly auth or mfa is skipped to skip MFA
-        return !context.isStepUpActive() && (userStronglyAuth || mfaSkipped);
+        return mfaSkipped || stronglyAuthenticated;
     }
     protected boolean isStepUpAuthentication(String selectionRule) {
         return ruleEngine.evaluate(selectionRule, context.getEvaluableContext(), Boolean.class, false);

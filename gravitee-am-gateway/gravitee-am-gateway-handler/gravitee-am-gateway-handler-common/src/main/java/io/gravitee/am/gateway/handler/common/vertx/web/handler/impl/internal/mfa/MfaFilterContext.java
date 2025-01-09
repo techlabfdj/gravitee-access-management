@@ -174,6 +174,10 @@ public class MfaFilterContext {
                 TRUE.equals(session.get(MFA_CHALLENGE_COMPLETED_KEY));
     }
 
+    public boolean isMfaExecuted() {
+        return TRUE.equals(session.get(MFA_EXECUTED));
+    }
+
     public boolean userHasMatchingActivatedFactors() {
         if (isNull(endUser.getFactors()) || endUser.getFactors().isEmpty()) {
             return false;

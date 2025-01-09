@@ -84,7 +84,7 @@ public interface ConstantKeys {
     String AUTH_FLOW_CONTEXT_ATTRIBUTES_KEY = "authFlow";
 
     // MFA keys.
-    String MFA_SKIPPED_KEY = "mfaEnrollmentSkipped";
+    String MFA_EXECUTED = "mfaExecuted";
     String MFA_ENROLLMENT_COMPLETED_KEY = "mfaEnrollmentCompleted";
     String MFA_CHALLENGE_COMPLETED_KEY = "mfaChallengeCompleted";
     String STRONG_AUTH_COMPLETED_KEY = "strongAuthCompleted";
