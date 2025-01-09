@@ -1043,7 +1043,7 @@ public class DomainServiceTest {
         when(roleService.findByDomain(DOMAIN_ID)).thenReturn(Single.just(Collections.singleton(role)));
         when(roleService.delete(eq(DOMAIN), eq(DOMAIN_ID), anyString())).thenReturn(complete());
         when(userService.deleteByDomain(DOMAIN_ID)).thenReturn(complete());
-        when(userActivityService.deleteByDomain(DOMAIN_ID)).thenReturn(complete());
+        when(userActivityService.deleteByDomain(any())).thenReturn(complete());
         when(scope.getId()).thenReturn(SCOPE_ID);
         when(scopeService.findByDomain(DOMAIN_ID, 0, Integer.MAX_VALUE)).thenReturn(Single.just(new Page<>(Collections.singleton(scope), 0, 1)));
         when(scopeService.delete(SCOPE_ID, true)).thenReturn(complete());
@@ -1099,7 +1099,7 @@ public class DomainServiceTest {
         verify(extensionGrantService, times(1)).delete(DOMAIN_ID, EXTENSION_GRANT_ID);
         verify(roleService, times(1)).delete(eq(DOMAIN), eq(DOMAIN_ID), eq(ROLE_ID));
         verify(userService, times(1)).deleteByDomain(DOMAIN_ID);
-        verify(userActivityService, times(1)).deleteByDomain(DOMAIN_ID);
+        verify(userActivityService, times(1)).deleteByDomain(any());
         verify(scopeService, times(1)).delete(SCOPE_ID, true);
         verify(groupService, times(1)).delete(eq(DOMAIN), eq(DOMAIN_ID), eq(GROUP_ID));
         verify(formService, times(1)).delete(eq(DOMAIN_ID), eq(FORM_ID));
@@ -1126,7 +1126,7 @@ public class DomainServiceTest {
         when(roleService.findByDomain(DOMAIN_ID)).thenReturn(Single.just(Collections.emptySet()));
         when(scopeService.findByDomain(DOMAIN_ID, 0, Integer.MAX_VALUE)).thenReturn(Single.just(new Page<>(Collections.emptySet(), 0, 1)));
         when(userService.deleteByDomain(DOMAIN_ID)).thenReturn(complete());
-        when(userActivityService.deleteByDomain(DOMAIN_ID)).thenReturn(complete());
+        when(userActivityService.deleteByDomain(any())).thenReturn(complete());
         when(groupService.findByDomain(DOMAIN_ID)).thenReturn(Flowable.empty());
         when(formService.findByDomain(DOMAIN_ID)).thenReturn(Flowable.empty());
         when(emailTemplateService.findAll(DOMAIN, DOMAIN_ID)).thenReturn(Flowable.empty());

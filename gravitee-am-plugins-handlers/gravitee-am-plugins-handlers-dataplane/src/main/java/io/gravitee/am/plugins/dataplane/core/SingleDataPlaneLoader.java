@@ -18,17 +18,25 @@ package io.gravitee.am.plugins.dataplane.core;
 import io.gravitee.am.dataplane.api.DataPlaneDescription;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-public class SingleDataPlaneLoader extends DataPlaneLoader {
+public class SingleDataPlaneLoader extends AbstractDataPlaneLoader {
     private static final String DATA_PLANE_KEY = "repositories.gateway";
     private static final String DATA_PLANE_ID_KEY = DATA_PLANE_KEY + ".dataPlane";
     private static final String DATA_PLANE_TYPE_KEY = DATA_PLANE_KEY + ".type";
+
+    private DataPlaneDescription description;
+
+    public List<DataPlaneDescription> getDataPlanes() {
+        return List.of(description);
+    }
 
     @Override
     protected void register() {
         var dataPlaneId = configuration.getProperty(DATA_PLANE_ID_KEY, String.class, "default");
         var dataPlaneType = configuration.getProperty(DATA_PLANE_TYPE_KEY, String.class, "mongodb");
-        var description = new DataPlaneDescription(dataPlaneId, dataPlaneId, dataPlaneType, DATA_PLANE_KEY);
+        this.description = new DataPlaneDescription(dataPlaneId, dataPlaneId, dataPlaneType, DATA_PLANE_KEY);
         create(description);
     }
 }

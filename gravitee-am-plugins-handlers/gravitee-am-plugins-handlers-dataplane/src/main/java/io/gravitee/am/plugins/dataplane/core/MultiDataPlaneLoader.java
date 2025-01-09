@@ -27,7 +27,7 @@ import java.util.function.Function;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
-public class MultiDataPlaneLoader extends DataPlaneLoader {
+public class MultiDataPlaneLoader extends AbstractDataPlaneLoader {
     private static final String DATA_PLANES_KEY = "dataPlanes";
 
     private Map<String, DataPlaneDescription> dataPlanDescriptions = new ConcurrentHashMap<>();

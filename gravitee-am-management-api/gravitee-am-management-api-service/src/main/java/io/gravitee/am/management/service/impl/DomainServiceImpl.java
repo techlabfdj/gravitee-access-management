@@ -569,7 +569,7 @@ public class DomainServiceImpl implements DomainService {
                                     })
                             )
                             //Delete all trace of activity of users for this domain
-                            .andThen(userActivityService.deleteByDomain(domainId))
+                            .andThen(userActivityService.deleteByDomain(domain))
                             // delete users
                             // do not delete one by one for memory consumption issue
                             // https://github.com/gravitee-io/issues/issues/6999
