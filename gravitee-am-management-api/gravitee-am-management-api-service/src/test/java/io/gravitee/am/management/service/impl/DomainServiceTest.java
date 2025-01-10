@@ -862,8 +862,8 @@ public class DomainServiceTest {
 
     @Test
     public void shouldNotPatch_newDataPlaneId() {
-        PatchDomain patchDomain = Mockito.mock(PatchDomain.class);
-        when(patchDomain.getDataPlaneId()).thenReturn(Optional.of("new-data-plane-id"));
+        PatchDomain patchDomain = new PatchDomain();
+        patchDomain.setDataPlaneId(Optional.of("new-data-plane-id"));
         Domain domain = new Domain();
         final var DOMAIN_ID = "my-domain";
         domain.setId(DOMAIN_ID);
