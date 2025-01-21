@@ -55,6 +55,18 @@
             <artifactId>gravitee-plugin-core</artifactId>
             <scope>provided</scope>
         </dependency>
+
+<!--        TODO?!?!?!?-->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-relational</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.repository</groupId>
+            <artifactId>gravitee-am-repository-jdbc-api</artifactId>
+            <version>4.7.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

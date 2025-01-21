@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.management.api.model;
+package io.gravitee.am.dataplane.jdbc.repository.model;
 
-import io.gravitee.am.repository.jdbc.provider.common.model.AbstractUser;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import io.gravitee.am.repository.jdbc.provider.common.model.AbstractUser;
+
+
 import java.time.LocalDateTime;
 
-/**
- * @author Eric LELEU (eric.leleu at graviteesource.com)
- * @author GraviteeSource Team
- */
 @Table("users")
-public class JdbcUser extends AbstractUser {
+public class UserEntity extends AbstractUser {
 
     @Table("user_entitlements")
     public static class Entitlements {

@@ -15,10 +15,18 @@
  */
 package io.gravitee.am.dataplane.jdbc.spring;
 
+import io.gravitee.am.repository.jdbc.provider.R2DBCConnectionConfiguration;
+import io.r2dbc.spi.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import  io.gravitee.am.repository.provider.ConnectionProvider;
 
 @Configuration
 @ComponentScan(basePackages = {"io.gravitee.am.dataplane.jdbc.repository"})
 public class JdbcDataPlaneSpringConfiguration {
+
+    @Autowired
+    private ConnectionProvider<ConnectionFactory, R2DBCConnectionConfiguration> connectionProvider;
 }

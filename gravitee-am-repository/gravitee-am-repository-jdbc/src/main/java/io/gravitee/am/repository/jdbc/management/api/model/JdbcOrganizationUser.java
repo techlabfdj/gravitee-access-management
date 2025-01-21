@@ -15,6 +15,7 @@
  */
 package io.gravitee.am.repository.jdbc.management.api.model;
 
+import io.gravitee.am.repository.jdbc.provider.common.model.AbstractUser;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 

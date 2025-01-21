@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.repository.jdbc.management.api.model;
+package io.gravitee.am.repository.jdbc.provider.common.model;
 
 import lombok.Getter;
 import lombok.Setter;
