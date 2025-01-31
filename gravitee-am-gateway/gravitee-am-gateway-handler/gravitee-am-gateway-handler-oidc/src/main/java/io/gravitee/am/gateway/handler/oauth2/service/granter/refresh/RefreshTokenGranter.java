@@ -108,7 +108,7 @@ public class RefreshTokenGranter extends AbstractTokenGranter {
         }
 
         return userAuthenticationManager.loadPreAuthenticatedUser(subject, tokenRequest)
-                .onErrorResumeNext(ex -> { return Maybe.error(new InvalidGrantException()); });
+                .onErrorResumeNext(ex -> Maybe.error(new InvalidGrantException(ex.getMessage())));
     }
 
     @Override
