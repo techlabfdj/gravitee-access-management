@@ -15,8 +15,10 @@
  */
 package io.gravitee.am.service.impl.application;
 
+import io.gravitee.am.dataplane.api.DataPlaneDescription;
 import io.gravitee.am.model.Domain;
 import io.gravitee.am.model.VirtualHost;
+import io.gravitee.am.plugins.dataplane.core.DataPlaneRegistry;
 import io.gravitee.am.repository.exceptions.TechnicalException;
 import io.gravitee.am.repository.management.api.DomainRepository;
 import io.gravitee.am.service.DomainReadService;
@@ -24,6 +26,7 @@ import io.gravitee.am.service.exception.TechnicalManagementException;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.observers.TestObserver;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -31,12 +34,19 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class DomainReadServiceImplTest {
     private final DomainRepository domainRepository = mock();
-    private final DomainReadService underTest = new DomainReadServiceImpl(domainRepository, "http://localhost:8092");
+    private final DataPlaneRegistry dataPlaneRegistry = mock();
+    private final DomainReadService underTest = new DomainReadServiceImpl(domainRepository, dataPlaneRegistry);
+
+    @BeforeEach
+    public void init() {
+        when(dataPlaneRegistry.getDescription(any())).thenReturn(new DataPlaneDescription("default", "Legcay DataPlane", "mongo", "baseProp", "http://localhost:8092"));
+    }
 
     @Test
     public void shouldFindById() {
@@ -123,7 +133,10 @@ class DomainReadServiceImplTest {
 
     @Test
     void shouldBuildUrl_vhostModeAndHttps() {
-        var underTest = new DomainReadServiceImpl(mock(), "https://localhost:8092");
+
+        var underTest = new DomainReadServiceImpl(mock(), dataPlaneRegistry);
+        when(dataPlaneRegistry.getDescription(any())).thenReturn(new DataPlaneDescription("default", "Legcay DataPlane", "mongo", "baseProp", "https://localhost:8092"));
+
 
         Domain domain = new Domain();
         domain.setPath("/testPath");
